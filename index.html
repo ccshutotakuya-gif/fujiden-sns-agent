@@ -1,0 +1,1868 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>有限会社藤電設工業 SNS運用エージェント v5 — 2026広報戦略実装版</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700&family=Noto+Sans+JP:wght@300;400;500;700&family=Fraunces:opsz,wght@9..144,400;9..144,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0E1A23;--bg-2:#15252F;--bg-3:#1B2D38;
+    --line:#26404F;--line-2:#324F60;
+    --ink:#EDE6D6;--ink-2:#B8B0A0;--ink-3:#7E7768;
+    --amber:#D4904A;--amber-2:#E8A865;
+    --sage:#7FA08F;--rust:#C46B4F;
+    --plat-x:#9FB7C7;--plat-ig:#D88A9C;--plat-yt:#D45A4A;
+    --serif:'Shippori Mincho B1',serif;
+    --serif-en:'Fraunces',serif;
+    --sans:'Noto Sans JP',sans-serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-weight:300;line-height:1.7;font-size:15px;min-height:100vh}
+  body{background-image:radial-gradient(circle at 15% 0%,rgba(212,144,74,.05),transparent 50%),radial-gradient(circle at 85% 100%,rgba(127,160,143,.04),transparent 50%)}
+
+  /* Header */
+  .topbar{display:grid;grid-template-columns:1fr auto 1fr;gap:24px;padding:20px 36px;border-bottom:1px solid var(--line);align-items:center}
+  .brand{display:flex;flex-direction:column;gap:2px}
+  .brand-mark{font-family:var(--serif);font-size:18px;letter-spacing:.04em;color:var(--ink)}
+  .brand-sub{font-size:11px;color:var(--ink-3);font-family:var(--serif-en);letter-spacing:.18em;text-transform:uppercase}
+  .topbar-center{font-family:var(--serif-en);font-size:13px;color:var(--ink-2);letter-spacing:.15em;text-align:center}
+  .topbar-right{display:flex;justify-content:flex-end;align-items:center;gap:14px;font-size:12px;color:var(--ink-3)}
+  .pulse{width:7px;height:7px;border-radius:50%;background:var(--sage);box-shadow:0 0 8px var(--sage);animation:p 2s infinite}
+  .pulse.off{background:var(--rust);box-shadow:0 0 8px var(--rust)}
+  @keyframes p{0%,100%{opacity:1}50%{opacity:.5}}
+
+  /* Platform switcher */
+  .platform-switcher{display:flex;border-bottom:1px solid var(--line);padding:0 36px;background:var(--bg-2)}
+  .plat-tab{display:flex;flex-direction:column;align-items:flex-start;padding:18px 28px;background:none;border:none;color:var(--ink-3);font-family:var(--sans);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;text-align:left;gap:2px}
+  .plat-tab:hover{color:var(--ink-2)}
+  .plat-tab.active{color:var(--ink);background:var(--bg)}
+  .plat-tab.active.x{border-bottom-color:var(--plat-x)}
+  .plat-tab.active.instagram{border-bottom-color:var(--plat-ig)}
+  .plat-tab.active.youtube{border-bottom-color:var(--plat-yt)}
+  .plat-tab-name{font-family:var(--serif);font-size:15px;font-weight:500;letter-spacing:.04em}
+  .plat-tab-meta{font-family:var(--serif-en);font-size:10px;letter-spacing:.18em;color:var(--ink-3);text-transform:uppercase}
+  .plat-tab.active .plat-tab-meta{color:var(--ink-2)}
+
+  /* Layout */
+  .shell{display:grid;grid-template-columns:200px 1fr;min-height:calc(100vh - 130px)}
+  .nav{border-right:1px solid var(--line);padding:24px 0}
+  .nav-item{display:block;width:100%;text-align:left;padding:11px 28px;background:none;border:none;color:var(--ink-3);font-family:var(--sans);font-size:14px;cursor:pointer;border-left:2px solid transparent;transition:all .15s;letter-spacing:.05em}
+  .nav-item:hover{color:var(--ink-2);background:var(--bg-2)}
+  .nav-item.active{color:var(--amber);border-left-color:var(--amber);background:var(--bg-2)}
+  .nav-section{font-size:10px;color:var(--ink-3);padding:20px 28px 8px;letter-spacing:.2em;text-transform:uppercase;font-family:var(--serif-en)}
+
+  .main{padding:36px 56px 80px;max-width:1100px}
+
+  /* Typography */
+  h1{font-family:var(--serif);font-size:30px;font-weight:500;letter-spacing:.04em;line-height:1.4;margin-bottom:8px}
+  h2{font-family:var(--serif);font-size:20px;font-weight:500;letter-spacing:.05em;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+  h3{font-family:var(--serif);font-size:16px;font-weight:500;letter-spacing:.04em;margin-bottom:10px;color:var(--amber-2)}
+  .kicker{font-family:var(--serif-en);font-size:11px;letter-spacing:.3em;color:var(--ink-3);text-transform:uppercase;margin-bottom:8px}
+  .lead{font-size:15px;color:var(--ink-2);margin-bottom:20px;font-weight:300}
+
+  /* Cards */
+  .card{background:var(--bg-2);border:1px solid var(--line);padding:26px;margin-bottom:18px}
+  .card-amber{border-left:3px solid var(--amber)}
+  .card-sage{border-left:3px solid var(--sage)}
+  .card-rust{border-left:3px solid var(--rust)}
+  .card-plat-x{border-left:3px solid var(--plat-x)}
+  .card-plat-ig{border-left:3px solid var(--plat-ig)}
+  .card-plat-yt{border-left:3px solid var(--plat-yt)}
+
+  /* Briefing greeting */
+  .briefing-greeting{padding:30px 34px;background:linear-gradient(180deg,var(--bg-3),var(--bg-2));border:1px solid var(--line-2);margin-bottom:28px;position:relative;overflow:hidden}
+  .briefing-greeting::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--amber)}
+  .briefing-greeting .date{font-family:var(--serif-en);font-size:11px;color:var(--ink-3);letter-spacing:.25em;margin-bottom:12px;text-transform:uppercase}
+  .briefing-greeting .text{font-family:var(--serif);font-size:17px;line-height:1.9;color:var(--ink);font-weight:500}
+
+  /* Buttons */
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border:1px solid var(--line-2);background:var(--bg-3);color:var(--ink);font-family:var(--sans);font-size:13px;cursor:pointer;letter-spacing:.05em;transition:all .15s}
+  .btn:hover{border-color:var(--amber);color:var(--amber)}
+  .btn-primary{background:var(--amber);color:#1A0F00;border-color:var(--amber);font-weight:500}
+  .btn-primary:hover{background:var(--amber-2);color:#1A0F00;border-color:var(--amber-2)}
+  .btn-ghost{background:none;border:1px solid var(--line)}
+  .btn-sm{padding:6px 12px;font-size:12px}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap}
+
+  /* Forms */
+  label{display:block;font-size:12px;color:var(--ink-2);margin-bottom:6px;letter-spacing:.05em}
+  input[type=text],input[type=password],textarea,select{width:100%;background:var(--bg);color:var(--ink);border:1px solid var(--line);padding:10px 14px;font-family:var(--sans);font-size:14px;transition:border .15s}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--amber)}
+  textarea{font-family:var(--mono);font-size:13px;resize:vertical;min-height:100px;line-height:1.6}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+  .field{margin-bottom:18px}
+
+  /* Drafts */
+  .draft{background:var(--bg-2);border:1px solid var(--line);padding:24px;margin-bottom:16px;position:relative}
+  .draft-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--line);gap:14px}
+  .draft-tag{font-family:var(--serif-en);font-size:10px;letter-spacing:.25em;color:var(--amber);text-transform:uppercase;padding:4px 10px;border:1px solid var(--amber);white-space:nowrap}
+  .draft-text{font-size:15px;line-height:1.85;color:var(--ink);white-space:pre-wrap;font-family:var(--sans);padding:14px;background:var(--bg);border:1px solid var(--line);margin-bottom:14px;min-height:60px;font-weight:400}
+  .draft-text[contenteditable=true]:focus{outline:1px solid var(--amber)}
+  .draft-meta{display:grid;grid-template-columns:1fr 1fr;gap:14px;font-size:12px;color:var(--ink-2);margin-bottom:14px}
+  .draft-meta strong{color:var(--ink-3);display:block;font-size:10px;letter-spacing:.15em;text-transform:uppercase;margin-bottom:4px;font-family:var(--serif-en);font-weight:400}
+  .draft-rationale{font-size:13px;color:var(--ink-2);font-style:italic;padding:12px 14px;background:var(--bg-3);border-left:2px solid var(--sage);margin-bottom:14px;line-height:1.7}
+  .draft-section{margin-bottom:14px}
+  .draft-section-title{font-family:var(--serif-en);font-size:10px;letter-spacing:.18em;color:var(--ink-3);text-transform:uppercase;margin-bottom:6px}
+  .draft-section-body{font-size:14px;color:var(--ink);line-height:1.75;white-space:pre-wrap}
+  .draft-actions{display:flex;gap:10px;flex-wrap:wrap;padding-top:8px;border-top:1px dashed var(--line)}
+  .draft.approved{border-color:var(--sage)}
+  .draft.approved::after{content:'承認済';position:absolute;top:24px;right:24px;font-family:var(--serif-en);font-size:10px;letter-spacing:.25em;color:var(--sage);text-transform:uppercase}
+  .draft.rejected{opacity:.4}
+
+  .title-options{display:grid;grid-template-columns:1fr;gap:6px}
+  .title-option{padding:10px 14px;background:var(--bg);border:1px solid var(--line);font-size:14px;line-height:1.5;cursor:pointer;transition:border .15s}
+  .title-option:hover{border-color:var(--amber)}
+  .title-option-num{font-family:var(--serif-en);font-size:10px;color:var(--amber);letter-spacing:.2em;margin-right:10px}
+
+  .hashtag-group{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+  .hashtag-row{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.6}
+  .hashtag-label{font-family:var(--serif-en);font-size:10px;letter-spacing:.18em;color:var(--ink-3);text-transform:uppercase;min-width:54px;padding-top:2px}
+  .hashtag-text{flex:1;color:var(--ink-2);word-break:break-all}
+
+  /* Lists */
+  .insight{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .insight:last-child{border-bottom:none}
+  .insight-mark{font-family:var(--serif-en);color:var(--amber);font-size:13px;flex-shrink:0;width:22px}
+  .insight-text{font-size:14px;color:var(--ink);line-height:1.7}
+
+  /* History */
+  .hist-row{display:grid;grid-template-columns:120px 1fr auto;gap:16px;padding:14px 0;border-bottom:1px solid var(--line);align-items:start}
+  .hist-date{font-family:var(--mono);font-size:12px;color:var(--ink-3)}
+  .hist-text{font-size:13px;color:var(--ink-2);line-height:1.6}
+  .hist-tag{font-family:var(--serif-en);font-size:10px;letter-spacing:.2em;color:var(--ink-3);text-transform:uppercase}
+
+  /* Loading */
+  .loading{display:flex;align-items:center;gap:12px;color:var(--ink-2);font-size:13px;padding:20px}
+  .spinner{width:14px;height:14px;border:1.5px solid var(--line-2);border-top-color:var(--amber);border-radius:50%;animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* Tab content */
+  .tab-content{display:none}
+  .tab-content.active{display:block}
+
+  /* Toast */
+  .toast{position:fixed;bottom:24px;right:24px;padding:14px 20px;background:var(--bg-3);border:1px solid var(--sage);border-left:3px solid var(--sage);font-size:13px;z-index:100;animation:slide .3s ease;max-width:400px}
+  .toast.error{border-color:var(--rust);border-left-color:var(--rust)}
+  @keyframes slide{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+  .muted{color:var(--ink-3);font-size:12px}
+  .divider{height:1px;background:var(--line);margin:24px 0}
+  hr{border:none;border-top:1px dashed var(--line);margin:20px 0}
+  code{font-family:var(--mono);font-size:12px;color:var(--amber-2);background:var(--bg);padding:2px 6px}
+
+  .empty{text-align:center;padding:48px 24px;color:var(--ink-3)}
+  .empty-mark{font-family:var(--serif);font-size:40px;color:var(--line-2);margin-bottom:12px}
+
+  /* Lock screen */
+  .lock-overlay{position:fixed;inset:0;background:var(--bg);background-image:radial-gradient(circle at 15% 0%,rgba(212,144,74,.06),transparent 50%),radial-gradient(circle at 85% 100%,rgba(127,160,143,.05),transparent 50%);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px}
+  .lock-card{max-width:440px;width:100%;background:var(--bg-2);border:1px solid var(--line-2);padding:48px 44px;text-align:center;position:relative}
+  .lock-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--amber)}
+  .lock-mark{font-family:var(--serif-en);font-size:11px;color:var(--ink-3);letter-spacing:.3em;text-transform:uppercase;margin-bottom:18px}
+  .lock-title{font-family:var(--serif);font-size:24px;font-weight:500;letter-spacing:.05em;color:var(--ink);margin-bottom:8px;line-height:1.5}
+  .lock-sub{font-family:var(--sans);font-size:13px;color:var(--ink-2);margin-bottom:36px;line-height:1.7}
+  .lock-card input[type=password]{width:100%;background:var(--bg);color:var(--ink);border:1px solid var(--line);padding:14px 16px;font-family:var(--sans);font-size:15px;letter-spacing:.05em;text-align:center;margin-bottom:14px}
+  .lock-card input[type=password]:focus{outline:none;border-color:var(--amber)}
+  .lock-card .btn-primary{width:100%;justify-content:center;padding:13px 20px;font-size:14px}
+  .lock-error{font-size:12px;color:var(--rust);margin-top:14px;min-height:18px;letter-spacing:.05em}
+  .lock-foot{margin-top:32px;padding-top:24px;border-top:1px solid var(--line);font-size:11px;color:var(--ink-3);letter-spacing:.05em;line-height:1.7}
+  .lock-foot strong{color:var(--ink-2);font-weight:400;display:block;margin-bottom:4px}
+  .app-hidden{display:none}
+
+  .platform-badge{display:inline-block;padding:3px 10px;font-family:var(--serif-en);font-size:10px;letter-spacing:.18em;text-transform:uppercase;border:1px solid currentColor}
+  .platform-badge.x{color:var(--plat-x)}
+  .platform-badge.instagram{color:var(--plat-ig)}
+  .platform-badge.youtube{color:var(--plat-yt)}
+</style>
+</head>
+<body>
+
+<!-- Lock screen (shown before authentication) -->
+<div id="lockOverlay" class="lock-overlay">
+  <div class="lock-card">
+    <div class="lock-mark">FUJIDEN × Cc</div>
+    <div class="lock-title">SNS運用エージェント v5</div>
+    <div class="lock-sub">2026 PR Strategy Implementation<br>チーム共通パスワードをご入力ください</div>
+    <input type="password" id="lockInput" placeholder="パスワード" autocomplete="current-password" autofocus>
+    <button class="btn btn-primary" onclick="tryUnlock()">ロック解除</button>
+    <div class="lock-error" id="lockError"></div>
+    <div class="lock-foot">
+      <strong>運用チーム：手塚PM ＋ SNS運用メンバー</strong>
+      認証情報はブラウザ内のみで管理され、外部送信されません。
+    </div>
+  </div>
+</div>
+
+<div id="appRoot" class="app-hidden">
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-mark">有限会社藤電設工業 × 株式会社Cc</div>
+    <div class="brand-sub">2026 PR Strategy Implementation × SNS Agent v5 / Tezuka PM Edition</div>
+  </div>
+  <div class="topbar-center" id="todayDate">—</div>
+  <div class="topbar-right">
+    <span id="kpiStatusLabel" style="font-size:11px">KPI未接続</span>
+    <span class="pulse off" id="kpiStatusDot" style="background:var(--ink-3);box-shadow:none;animation:none"></span>
+    <span style="color:var(--line-2)">|</span>
+    <span id="apiStatusLabel">APIキー未設定</span>
+    <span class="pulse off" id="apiStatusDot"></span>
+  </div>
+</div>
+
+<div class="platform-switcher">
+  <button class="plat-tab x active" data-platform="x">
+    <span class="plat-tab-name">X</span>
+    <span class="plat-tab-meta">Daily / Text</span>
+  </button>
+  <button class="plat-tab instagram" data-platform="instagram">
+    <span class="plat-tab-name">Instagram</span>
+    <span class="plat-tab-meta">2-3× / week / Visual</span>
+  </button>
+  <button class="plat-tab youtube" data-platform="youtube">
+    <span class="plat-tab-name">YouTube</span>
+    <span class="plat-tab-meta">Monthly / Video</span>
+  </button>
+</div>
+
+<div class="shell">
+  <nav class="nav">
+    <div class="nav-section">Daily Workflow</div>
+    <button class="nav-item active" data-tab="briefing">ブリーフィング</button>
+    <button class="nav-item" data-tab="drafts">企画／投稿案</button>
+    <button class="nav-item" data-tab="input">データ投入</button>
+    <button class="nav-item" data-tab="history">運用履歴</button>
+    <div class="nav-section">Foundation</div>
+    <button class="nav-item" data-tab="brand">ブランド軸</button>
+    <button class="nav-item" data-tab="settings">設定</button>
+  </nav>
+
+  <main class="main">
+
+    <!-- BRIEFING TAB -->
+    <section class="tab-content active" id="tab-briefing">
+      <div class="kicker"><span id="b-platform-kicker">X</span> Briefing</div>
+      <h1 id="b-title">本日の戦略ブリーフィング</h1>
+      <p class="lead" id="b-lead">手塚PMへ。前日のパフォーマンス、業界トレンド、本日の方針、投稿案までをひとまとめにご報告します。</p>
+      <div id="briefingArea">
+        <div class="empty">
+          <div class="empty-mark">序</div>
+          <p>「データ投入」タブから情報をご入力後、本画面でブリーフィング生成を実行してください。</p>
+          <div style="margin-top:20px"><button class="btn btn-primary" onclick="setTab('input')">データ投入へ</button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DRAFTS TAB -->
+    <section class="tab-content" id="tab-drafts">
+      <div class="kicker"><span id="d-platform-kicker">X</span> Plans</div>
+      <h1 id="d-title">本日の投稿案</h1>
+      <p class="lead" id="d-lead">3つの異なる切り口で投稿案をご用意しました。</p>
+      <div id="draftsArea">
+        <div class="empty"><div class="empty-mark">空</div><p>ブリーフィング生成と同時に作成されます。</p></div>
+      </div>
+    </section>
+
+    <!-- INPUT TAB -->
+    <section class="tab-content" id="tab-input">
+      <div class="kicker"><span id="i-platform-kicker">X</span> Intake</div>
+      <h1 id="i-title">データ投入</h1>
+      <p class="lead" id="i-lead">テンプレに沿ってご入力ください。</p>
+      <div id="inputArea"></div>
+      <div class="btn-row" style="margin-top:24px">
+        <button class="btn btn-primary" onclick="generateBriefing()">ブリーフィングと企画を生成</button>
+        <button class="btn btn-ghost" onclick="loadSampleData()">サンプル投入</button>
+        <button class="btn btn-ghost" onclick="clearInputs()">入力クリア</button>
+      </div>
+    </section>
+
+    <!-- HISTORY TAB -->
+    <section class="tab-content" id="tab-history">
+      <div class="kicker"><span id="h-platform-kicker">X</span> Archive</div>
+      <h1>運用履歴</h1>
+      <p class="lead">過去のブリーフィングと承認履歴。エージェントは毎朝この履歴を参照して提案を組み立てます。</p>
+      <div id="historyArea"></div>
+    </section>
+
+    <!-- BRAND TAB -->
+    <section class="tab-content" id="tab-brand">
+      <div class="kicker">Strategy Foundation</div>
+      <h1>2026広報戦略 ＆ ブランド軸 <span class="muted" style="font-family:var(--sans);font-size:13px;font-weight:300">(全プラットフォーム共通)</span></h1>
+      <p class="lead">藤電設工業の2026広報戦略とブランド情報。全プラットフォームのエージェントが、毎回これを最重要前提として参照します。</p>
+
+      <div class="card" style="border-left:3px solid var(--amber-2);background:var(--bg-3)">
+        <h3 style="color:var(--amber-2)">2026広報戦略 — クライアント承認済の核</h3>
+        <p class="muted" style="margin-bottom:14px">この戦略がエージェントの判断軸の最上位レイヤーです。ここを変更すると全プラットフォームの出力傾向が変わります。</p>
+        <div class="field">
+          <label>コアメッセージ</label>
+          <textarea id="sCoreMessage" style="min-height:60px"></textarea>
+        </div>
+        <div class="field">
+          <label>刺さるテーマ（発注者・長期検討者向け）</label>
+          <textarea id="sKeyThemes" style="min-height:100px"></textarea>
+        </div>
+        <div class="field">
+          <label>刺さりワード</label>
+          <textarea id="sTriggerWords" style="min-height:60px"></textarea>
+        </div>
+        <div class="field">
+          <label>CTA設計</label>
+          <textarea id="sCta" style="min-height:60px"></textarea>
+        </div>
+        <div class="field">
+          <label>意思決定構造（広報の役割）</label>
+          <textarea id="sDecisionFlow" style="min-height:60px"></textarea>
+        </div>
+        <div class="field">
+          <label>協力企業向けの刺さるテーマ（取引の体験価値）</label>
+          <textarea id="sPartnerThemes" style="min-height:90px"></textarea>
+        </div>
+        <div class="field">
+          <label>広報×ルート営業の戦術（URLを同行させる）</label>
+          <textarea id="sRouteSalesPlay" style="min-height:90px"></textarea>
+        </div>
+        <div class="field">
+          <label>既存顧客が広報担当者になる（中心コンテンツ）</label>
+          <textarea id="sCustomerAsAdvocate" style="min-height:100px"></textarea>
+        </div>
+      </div>
+
+      <div class="card card-amber">
+        <h3>会社・事業の概要</h3>
+        <div class="field">
+          <label>会社名・業種</label>
+          <input type="text" id="bCompany" placeholder="有限会社藤電設工業／精密板金加工・金属加工・溶接（東京都小平市・1970年創業・57年目）">
+        </div>
+        <div class="field">
+          <label>強み・特徴（複数可）</label>
+          <textarea id="bStrengths" style="min-height:80px" placeholder="例: 創業57年の判断の上手さ、YAG溶接・ヘアライン仕上げ、3次元レーザー、1個からの特注対応"></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>ターゲット・目標</h3>
+        <div class="field">
+          <label>ターゲット階層（最優先=発注者、次点=長期検討者、3番手=協力企業、最下位=採用）</label>
+          <textarea id="bTarget" style="min-height:80px"></textarea>
+        </div>
+        <div class="field">
+          <label>SNSで達成したいこと（KPI再定義込み）</label>
+          <textarea id="bGoal" style="min-height:80px"></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>トンマナ・NG事項</h3>
+        <div class="field">
+          <label>表現のトーン（判断の上手さを証明する語り口）</label>
+          <input type="text" id="bTone">
+        </div>
+        <div class="field">
+          <label>避けたい表現・話題</label>
+          <input type="text" id="bNg">
+        </div>
+      </div>
+
+      <div class="card card-sage">
+        <h3>累積学習プロファイル <span class="muted">(自動更新・全プラットフォーム横断)</span></h3>
+        <p class="muted" style="margin-bottom:10px">過去の運用から伸びた投稿の傾向、承認された案のトーン特徴を蓄積していきます。</p>
+        <textarea id="bProfile" style="min-height:140px;color:var(--ink-2)" placeholder="(まだ履歴がありません)"></textarea>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveBrand()">戦略・ブランド軸を保存</button>
+        <button class="btn btn-ghost" onclick="reloadBrand()">破棄して再読込</button>
+      </div>
+    </section>
+
+    <!-- SETTINGS TAB -->
+    <section class="tab-content" id="tab-settings">
+      <div class="kicker">System</div>
+      <h1>システム設定</h1>
+      <p class="lead">Gemini APIキーの設定と各種オプション。APIキーはブラウザのlocalStorageのみに保存され、外部送信されません。</p>
+
+      <div class="card card-amber">
+        <h3>Gemini API キー</h3>
+        <p class="muted" style="margin-bottom:12px">無料枠で十分運用可能です。<a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--amber-2)">aistudio.google.com</a> で取得できます。</p>
+        <div class="form-row">
+          <div>
+            <label>APIキー</label>
+            <input type="password" id="apiKey" placeholder="AIzaSy...">
+          </div>
+          <div>
+            <label>モデル</label>
+            <select id="apiModel">
+              <option value="gemini-2.5-flash">gemini-2.5-flash（推奨・速い）</option>
+              <option value="gemini-2.5-pro">gemini-2.5-pro（精度重視）</option>
+              <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+            </select>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="saveApiKey()">保存して接続テスト</button>
+          <button class="btn btn-ghost" onclick="clearApiKey()">削除</button>
+        </div>
+      </div>
+
+      <div class="card card-sage">
+        <h3>KPIダッシュボード接続</h3>
+        <p class="muted" style="margin-bottom:12px">既存の「（2026）藤電設工業KPIダッシュボード」をスプレッドシートとして公開し、CSV URLをご入力ください。ブログ自動化システムと同じ <code>/pub?gid=...&amp;output=csv</code> 形式に対応します。<br>毎朝のブリーフィング生成時、AIにKPIデータを自動で参照させます。</p>
+        <div class="field">
+          <label>公開CSV URL（メインシート）</label>
+          <input type="text" id="kpiUrl" placeholder="https://docs.google.com/spreadsheets/d/.../pub?gid=...&single=true&output=csv">
+        </div>
+        <div class="field" style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <input type="checkbox" id="kpiAutoInject" style="width:auto" checked>
+          <label for="kpiAutoInject" style="margin:0;cursor:pointer">ブリーフィング生成時に自動で最新データを取得・注入する</label>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="saveKpiSettings()">保存</button>
+          <button class="btn" onclick="fetchKpiManual()">取得テスト</button>
+          <button class="btn btn-ghost" onclick="clearKpi()" style="color:var(--rust)">削除</button>
+        </div>
+        <div id="kpiStatus" style="margin-top:14px"></div>
+        <div id="kpiPreview" style="margin-top:14px"></div>
+      </div>
+
+      <div class="card">
+        <h3>データのエクスポート/インポート</h3>
+        <p class="muted" style="margin-bottom:14px">運用履歴・ブランド軸・各プラットフォームの状態をJSONで保存。社内共有や別端末への移行に。</p>
+        <div class="btn-row">
+          <button class="btn" onclick="exportAll()">全データをエクスポート</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('importFile').click()">インポート</button>
+          <input type="file" id="importFile" accept=".json" style="display:none" onchange="importAll(event)">
+          <button class="btn btn-ghost" onclick="resetAll()" style="color:var(--rust)">全データ削除</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>運用Tips</h3>
+        <div class="insight"><span class="insight-mark">i.</span><span class="insight-text">Xは毎朝、Instagramは週前半に「今週のプラン」、YouTubeは月初に「今月の企画」を回すリズムが推奨です。</span></div>
+        <div class="insight"><span class="insight-mark">ii.</span><span class="insight-text">プラットフォームを切り替えると、ブリーフィング・企画・データ投入・履歴がそれぞれ独立して切り替わります。ブランド軸・KPI接続・設定だけ全体で共通です。</span></div>
+        <div class="insight"><span class="insight-mark">iii.</span><span class="insight-text">Instagramは投稿そのものより「撮影ブリーフ」と「キャプション戦略」が中心。YouTubeは「動画企画書」を出す位置づけです。投稿作業自体は引き続き手作業が必要です（プラットフォームAPIの制約のため）。</span></div>
+        <div class="insight"><span class="insight-mark">iv.</span><span class="insight-text">KPIダッシュボードに記載のキーワード・ターゲット・指標は、AIが毎回参照して提案に反映します。ダッシュボード側の更新が、翌朝のブリーフィングから自動で効きます。</span></div>
+      </div>
+
+      <div class="card" style="border-left:3px solid var(--rust)">
+        <h3>セキュリティ</h3>
+        <p class="muted" style="margin-bottom:14px">このアプリはチーム共通パスワードでアクセス制御されています。共用PCを使う場合や、メンバーが離脱した場合はログアウトをご利用ください。</p>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="logout()" style="color:var(--rust)">ログアウト</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+</div><!-- /appRoot -->
+
+<script>
+// ====== Auth (lock screen) ======
+const TEAM_PASSWORD_HASH = '97527675854a6d10a0f5427ed155314c37175e070e5112e7dd3f512d72d03bbc';
+const AUTH_FLAG = 'fujidensetsu_sns_agent_v5_authed_v1';
+
+async function sha256Hex(text){
+  const buf = new TextEncoder().encode(text);
+  const hash = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function tryUnlock(){
+  const input = document.getElementById('lockInput');
+  const errEl = document.getElementById('lockError');
+  errEl.textContent = '';
+  const pw = (input.value || '').trim();
+  if(!pw){
+    errEl.textContent = 'パスワードを入力してください';
+    return;
+  }
+  try{
+    const h = await sha256Hex(pw);
+    if(h === TEAM_PASSWORD_HASH){
+      localStorage.setItem(AUTH_FLAG, 'ok');
+      revealApp();
+    } else {
+      errEl.textContent = 'パスワードが正しくありません';
+      input.value = '';
+      input.focus();
+    }
+  }catch(e){
+    errEl.textContent = '認証エラー: ' + e.message;
+  }
+}
+
+function revealApp(){
+  document.getElementById('lockOverlay').style.display = 'none';
+  document.getElementById('appRoot').classList.remove('app-hidden');
+}
+
+function logout(){
+  if(!confirm('ログアウトしますか？次回アクセス時にパスワード入力が必要になります。')) return;
+  localStorage.removeItem(AUTH_FLAG);
+  location.reload();
+}
+
+// Enter キーでロック解除
+document.getElementById('lockInput').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){ e.preventDefault(); tryUnlock(); }
+});
+
+// 認証済みなら即アプリ表示
+if(localStorage.getItem(AUTH_FLAG) === 'ok'){
+  revealApp();
+}
+
+// ====== Constants ======
+const STORE_KEY = 'fujidensetsu_sns_agent_v5';
+
+const PLATFORMS = {
+  x: {
+    name: 'X (社長個人アカウント)',
+    label: 'X',
+    cadence: '週3回以上',
+    cadenceEn: 'Weekly 3+',
+    titles: {
+      briefing: '本日の戦略ブリーフィング',
+      briefingLead: '社長個人Xアカウントとして、設計・調達・経営者の頭に「藤電設工業＝判断がちゃんとしてる」を刷り込む運用です。前日反応、トレンド、本日の判断系投稿案をご報告します。',
+      drafts: '本日の投稿案',
+      draftsLead: '3つの切り口で投稿案をご用意しました。「判断・段取り・リスク回避」を主軸にしています。承認後、X投稿画面へ事前入力済みでジャンプできます。',
+      input: 'データ投入（X）',
+      inputLead: '前日の社長X投稿の反応、業界の動き、最近遭遇した「判断トピック」をご入力ください。'
+    },
+    inputs: [
+      {id:'inPosts', label:'① 前日の社長X投稿の反応', tone:'card-amber', help:'1投稿1行で「投稿内容 ／ いいね数 ／ Imp数」の形式。', placeholder:'例:\n図面の段階で違和感ある寸法、止めるかそのまま行くかの線引き。当社は迷わず止める。 ／ いいね22 ／ Imp 1,820\n納期"無理ですね"より"こうすれば間に合います"を返す方が結果的に信頼が積み上がる ／ いいね41 ／ Imp 2,650', minHeight:120},
+      {id:'inTrends', label:'② 業界・調達/設計界隈の動き', help:'発注者（設計者・調達担当）が直近気にしていそうな話題。', placeholder:'例:\n- 図面ミスで現場が止まった事例が業界紙で複数報道\n- 鋼材値上げで設計仕様変更の相談が増えている雰囲気\n- 「相見積もりだけ送られて困る」という発注者の声がXで散見', minHeight:100},
+      {id:'inCompetitors', label:'③ 同業の発信動向（任意）', help:'参考になる中小製造業の社長アカウント・公式の動き。', placeholder:'例:\n- 由紀精密の社長アカウントが調達担当向けの投稿で反応\n- HILLTOPの「断る勇気」系投稿が拡散', minHeight:80},
+      {id:'inDirective', label:'④ 手塚さんからの指示・最近遭遇した判断トピック（任意）', help:'今日の出力に反映してほしい題材。実際の現場で起きた「判断の話」があれば最も強い素材になります。', type:'text', placeholder:'例: 先週、図面の寸法ミスに気づいて止めた話を抽象化したい'}
+    ]
+  },
+  instagram: {
+    name: 'Instagram',
+    label: 'IG',
+    cadence: '週3回',
+    cadenceEn: 'Weekly 3',
+    titles: {
+      briefing: '今週のIG戦略ブリーフィング',
+      briefingLead: 'IGの役割は「長期検討者の記憶に残すこと」。藤電設工業のことを理解できるコンテンツで、迷ったときに思い出される会社にする運用です。撮影ブリーフとキャプション戦略をご提案します。',
+      drafts: '撮影ブリーフ＋キャプション案',
+      draftsLead: '3つの撮影テーマをご用意しました。"判断"を視覚化する切り口で、「保存される投稿」を狙います。撮影前の指示書とキャプション骨子をセットでお渡しします。',
+      input: 'データ投入（Instagram）',
+      inputLead: '直近の投稿反応、今週の工場の動き、撮影候補をご入力ください。'
+    },
+    inputs: [
+      {id:'igRecent', label:'① 直近のIG投稿実績（過去5件目安）', tone:'card-amber', help:'「投稿テーマ ／ いいね数 ／ 保存数 ／ コメント数」の形式が読みやすいです。保存数が最重要KPI。', placeholder:'例:\n発注前に確認すべき10項目スワイプ ／ いいね180 ／ 保存32 ／ コメント8\n図面の段取りBefore/After ／ いいね92 ／ 保存5 ／ コメント12\n工場の朝礼風景 ／ いいね45 ／ 保存2 ／ コメント1\n"段取りで品質が決まる"の解説カルーセル ／ いいね210 ／ 保存48 ／ コメント6', minHeight:120},
+      {id:'igUpcoming', label:'② 今週の工場での撮影候補・取材可能なネタ', help:'撮影できそうな案件、職人の段取り風景、判断シーン、稼働予定の設備など。', placeholder:'例:\n- 火曜: 図面の事前確認ミーティング撮影OK\n- 水曜: 職人さんが段取りを工夫している様子\n- 木曜: 仕様変更の相談を受けた事例(顧客了解済の範囲で)\n- 金曜: 朝礼で共有された"今週の注意点"', minHeight:100},
+      {id:'igTrends', label:'③ 製造業系IGのトレンド', help:'製造業・町工場系IGで伸びているフォーマットや話題。', placeholder:'例:\n- 「保存される」スワイプ系（チェックリスト・10項目モノ）が伸びている\n- 同業の社長アカウントが「断った話」系で反応\n- 図解・情報整理系のリーチが安定', minHeight:80},
+      {id:'igDirective', label:'④ 手塚さんからの指示（任意）', help:'今週の出力に反映してほしい意図。', type:'text', placeholder:'例: 「判断の辞書」シリーズを始めたい / 段取りの見える化を中心に'}
+    ]
+  },
+  youtube: {
+    name: 'YouTube',
+    label: 'YT',
+    cadence: '週1回',
+    cadenceEn: 'Weekly 1',
+    titles: {
+      briefing: '今週のYouTube戦略ブリーフィング',
+      briefingLead: 'YouTubeの役割は「検索される・指名される状態を作ること」。モノづくりが大好きな人向けに、判断軸・段取り・現場のリアルを伝える企画です。長尺／Shortsそれぞれの企画書を、SEOとサムネ込みでご提案します。',
+      drafts: '動画企画書',
+      draftsLead: 'タイトル候補・サムネコンセプト・構成・SEO description まで一式お渡しします。撮影前のすり合わせ資料としてそのまま使える粒度で。',
+      input: 'データ投入（YouTube）',
+      inputLead: '過去動画のパフォーマンス、撮影できるテーマ、検索されそうな疑問をご入力ください。'
+    },
+    inputs: [
+      {id:'ytPast', label:'① 過去動画のパフォーマンス（直近3-5本）', tone:'card-amber', help:'「タイトル ／ 再生数 ／ 平均視聴維持率 ／ 何が良かったか・悪かったか」', placeholder:'例:\n「図面の段階で危ない案件の見抜き方」 ／ 4,200再生 ／ 維持率48% ／ 検索流入好調\n「納期が無理なときに発注者へ返すべき言葉」 ／ 2,800再生 ／ 維持率55% ／ サムネが弱かった', minHeight:120},
+      {id:'ytTopics', label:'② 取材・撮影可能なテーマ／案件／社内素材', help:'今月撮れそうな題材。「判断・段取り・断った話・止めた話」が最強の素材。', placeholder:'例:\n- 先月、図面の問題に気づいて止めた案件(顧客了解済の抽象化版)\n- 社長の「断る基準」インタビュー\n- 職人による"段取り命"の解説\n- 取引先とのコラボ動画(年6回計画あり)', minHeight:100},
+      {id:'ytQuestions', label:'③ 検索されそうな疑問・発注者/長期検討者の関心', help:'設計者・調達担当が検索しそうな疑問。「判断の辞書」になるテーマ。', placeholder:'例:\n- 良い外注先の見分け方\n- 発注前に確認すべきポイント\n- 図面だけでは伝わらないこと\n- 仕様変更の正しい伝え方\n- 加工屋と設計者の認識ズレ事例', minHeight:100},
+      {id:'ytDirective', label:'④ 手塚さんからの指示（任意）', help:'今週の方向性。長尺・Shorts・コラボなど。', type:'text', placeholder:'例: 「判断の辞書」シリーズの長尺1本 + 段取り解説Shorts2本'}
+    ]
+  }
+};
+
+// ====== State ======
+const state = {
+  api: { key:'', model:'gemini-2.5-flash' },
+  brand: {
+    company:'有限会社藤電設工業／精密板金加工・金属加工・溶接（東京都小平市・1970年創業・57年目）',
+    strengths:'創業57年（1970年〜）の老舗精密板金加工工場。最大の強みは「加工の上手さ」ではなく「判断の上手さ」。発注者が困る前に止める／段取りする／仕様整理する力。技術的にはステンレス・アルミ・銅・真鍮の精密板金、特に溶接（バフ・ヘアライン仕上げ、YAG溶接）、3次元レーザー・微細レーザーなど多様な加工設備、SUS／アルミ／銅・真鍮対応、1個からの特注対応、強力な協力企業ネットワーク。2002年以降の出荷件数20万件以上。',
+    target:'【最優先】発注者（売上に即決する設計者・調達担当者）／【次点】長期検討者（迷ったときに思い出してもらいたい見込客）／【3番手】協力企業（既存パートナー）／【最低優先・変動】採用（量より「ズレない人」）',
+    goal:'【発注者】図面を出す前に相談される状態を作る／【長期検討者】迷ったら思い出す会社になる（指名検索の土台）／【協力企業】安心して組める会社になる（供給力の確保）／全体KPI：問い合わせ数ではなく、指名相談件数・既存顧客からの紹介数・「藤電設を知っている前提」で始まる商談数',
+    tone:'判断の上手さを証明するメディアとして発信する。技術自慢・職人の手元映え・現場の臨場感は「主役」にしない。むしろ「判断・段取り・リスク回避・事前確認・仕様整理」を主軸にする。落ち着いた、誠実な、相手の不安を代弁する語り口。「事故らない」「やり直しを防ぐ」「後で困らない」が刺さりワード。',
+    ng:'【絶対NG】売り込み調・技術自慢・職人技自慢・派手な現場の臨場感推し・採用色を前面に出した訴求・同業他社批判・誇張表現・政治社会論・特定顧客名（許可なき）・機密性のある図面/仕様の露出。「探す」より「思い出される」が広報戦略の本質。営業トークではなく事前評価を作る。',
+    profile:''
+  },
+  strategy: {
+    coreMessage: '判断に疲れている人のために、代わりに考え続けている工場。創業57年の加工の上手さではなく、判断の上手さを証明するメディアにする。',
+    keyThemes: '【発注者向け・刺さるテーマ】「この図面、危ないです（先に止める）」／「納期が無理なときの最適解」／「品質が荒れる原因は加工じゃなく段取り」／「価格交渉が起きる案件の共通点」／「トラブルを未然に潰す確認項目」 ／【長期検討者向け】"判断の辞書"を作る／「良い外注先の見分け方」／「発注側が言語化できない不安の代弁」',
+    triggerWords: '段取り／リスク／事前確認／仕様整理／現場が止まる／"後で困らない"／"事故らない"／"やり直しを防ぐ"／迷う／正解が分からない／比較できない／選べない／"判断基準"／"基準がない"',
+    cta: '「問い合わせ」ではなく「相談」導線に寄せる。例：図面なし壁打ち／段取り診断／仕様整理相談。長期検討者には相談を取らない（保存・検索・再訪が勝ち）。',
+    decisionFlow: '製造業の意思決定は「探す」より「思い出す」。営業トークの前に、相手の頭の中で"採点"を終わらせておくのが広報の役割。',
+    partnerThemes: '【協力企業向け・刺さるテーマ】"無理を前提にしない仕事設計"／依頼の出し方の型／品質・納期の合意形成のやり方／"協力会社を守る"。協力企業に効くのはバズでもPRでもなく「取引の体験価値」（依頼が明確・判断が早い・変更が少ない・支払いが堅い・トラブル時に逃げない・相談しやすい）。発信＝相手にとっての"仕事のしやすさ"を上げる情報提供にする。',
+    routeSalesPlay: '広報はルート営業の前段に置く。営業同行の代わりに「URLを同行させる」（ブログ／YouTube／判断まとめ資料／月次配信）。営業が説明しないほど格が上がる。広報テーマは「図面を止めた話」「無理な納期を断った話」「仕様整理を代行した話」「協力会社を守った話」など、売上に直結しない"判断の話"。これが信頼に変わる。',
+    customerAsAdvocate: '既存顧客が「藤電設はこういう判断基準がある」「だから安心して任せてる」「止めてくれる会社」と勝手に言語化してくれる状態を作る。既存顧客向けコンテンツ（月1推奨）は外向けSNSとは別ライン（メール／LINE公式／A4 1枚PDF）で「今月の判断」「今月の注意点」を配信。これを整えると新規顧客・採用・協力企業すべてに波及する中心コンテンツになる。SNS発信もこの「既存顧客が説明できる材料」を意識して組む。'
+  },
+  kpi: {
+    url: '',
+    lastFetched: null,
+    rawData: '',
+    parsed: null,
+    autoInject: true
+  },
+  activePlatform: 'x',
+  platforms: {
+    x: { inputs:{}, lastBriefing:null, lastDrafts:[], history:[] },
+    instagram: { inputs:{}, lastBriefing:null, lastDrafts:[], history:[] },
+    youtube: { inputs:{}, lastBriefing:null, lastDrafts:[], history:[] }
+  }
+};
+
+function load(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(raw){
+      const loaded = JSON.parse(raw);
+      Object.assign(state, loaded);
+      ['x','instagram','youtube'].forEach(p=>{
+        if(!state.platforms[p]) state.platforms[p] = { inputs:{}, lastBriefing:null, lastDrafts:[], history:[] };
+      });
+    }
+  }catch(e){ console.error(e); }
+}
+function save(){ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+
+const cur = () => state.platforms[state.activePlatform];
+const conf = () => PLATFORMS[state.activePlatform];
+
+// ====== Platform Switcher ======
+function setPlatform(p){
+  state.activePlatform = p;
+  save();
+  document.querySelectorAll('.plat-tab').forEach(t=>t.classList.toggle('active', t.dataset.platform===p));
+  refreshUI();
+}
+document.querySelectorAll('.plat-tab').forEach(t=>{
+  t.addEventListener('click', ()=>setPlatform(t.dataset.platform));
+});
+
+// ====== Tabs ======
+function setTab(name){
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
+  document.querySelectorAll('.tab-content').forEach(s=>s.classList.toggle('active', s.id==='tab-'+name));
+  if(name==='input') renderInputForm();
+  if(name==='history') renderHistory();
+  if(name==='brand') renderBrand();
+  if(name==='settings') renderSettings();
+  if(name==='briefing') renderBriefing(cur().lastBriefing);
+  if(name==='drafts') renderDrafts();
+}
+document.querySelectorAll('.nav-item').forEach(b=>{
+  b.addEventListener('click',()=>setTab(b.dataset.tab));
+});
+
+// ====== Refresh UI on platform switch ======
+function refreshUI(){
+  const c = conf();
+  document.getElementById('b-platform-kicker').textContent = c.name;
+  document.getElementById('b-title').textContent = c.titles.briefing;
+  document.getElementById('b-lead').textContent = c.titles.briefingLead;
+  document.getElementById('d-platform-kicker').textContent = c.name;
+  document.getElementById('d-title').textContent = c.titles.drafts;
+  document.getElementById('d-lead').textContent = c.titles.draftsLead;
+  document.getElementById('i-platform-kicker').textContent = c.name;
+  document.getElementById('i-title').textContent = c.titles.input;
+  document.getElementById('i-lead').textContent = c.titles.inputLead;
+  document.getElementById('h-platform-kicker').textContent = c.name;
+  
+  renderInputForm();
+  renderBriefing(cur().lastBriefing);
+  renderDrafts();
+  renderHistory();
+}
+
+// ====== Date ======
+function fmtDate(d){
+  const w = ['日','月','火','水','木','金','土'][d.getDay()];
+  return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${w}）`;
+}
+document.getElementById('todayDate').textContent = fmtDate(new Date());
+
+// ====== Settings ======
+function renderSettings(){
+  document.getElementById('apiKey').value = state.api.key || '';
+  document.getElementById('apiModel').value = state.api.model || 'gemini-2.5-flash';
+  document.getElementById('kpiUrl').value = state.kpi.url || '';
+  document.getElementById('kpiAutoInject').checked = state.kpi.autoInject !== false;
+  renderKpiStatus();
+  renderKpiPreview();
+}
+function saveApiKey(){
+  state.api.key = document.getElementById('apiKey').value.trim();
+  state.api.model = document.getElementById('apiModel').value;
+  save();
+  testApi();
+}
+function clearApiKey(){
+  state.api.key = '';
+  save();
+  renderSettings();
+  setApiStatus(false);
+  toast('APIキーを削除しました', false);
+}
+function setApiStatus(ok){
+  const dot = document.getElementById('apiStatusDot');
+  const lbl = document.getElementById('apiStatusLabel');
+  if(ok){ dot.classList.remove('off'); lbl.textContent='接続OK'; }
+  else { dot.classList.add('off'); lbl.textContent= state.api.key ? '未確認' : 'APIキー未設定'; }
+}
+async function testApi(){
+  if(!state.api.key){ setApiStatus(false); return; }
+  try{
+    await callGemini('「OK」と一言だけ返してください。');
+    setApiStatus(true);
+    toast('APIキー接続OK',false);
+  }catch(e){
+    setApiStatus(false);
+    toast('接続失敗: '+e.message, true);
+  }
+}
+
+// ====== KPI Dashboard ======
+function saveKpiSettings(){
+  state.kpi.url = document.getElementById('kpiUrl').value.trim();
+  state.kpi.autoInject = document.getElementById('kpiAutoInject').checked;
+  save();
+  toast('KPI設定を保存しました', false);
+  renderKpiStatus();
+}
+function clearKpi(){
+  if(!confirm('KPI接続情報を削除しますか？')) return;
+  state.kpi = { url:'', lastFetched:null, rawData:'', parsed:null, autoInject:true };
+  save();
+  renderSettings();
+  setKpiStatus('off');
+  toast('KPI接続情報を削除しました', false);
+}
+function setKpiStatus(mode){
+  const dot = document.getElementById('kpiStatusDot');
+  const lbl = document.getElementById('kpiStatusLabel');
+  if(!dot || !lbl) return;
+  if(mode==='ok'){
+    dot.style.background = 'var(--sage)';
+    dot.style.boxShadow = '0 0 8px var(--sage)';
+    dot.style.animation = 'p 2s infinite';
+    const t = state.kpi.lastFetched ? new Date(state.kpi.lastFetched).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '取得済';
+    lbl.textContent = 'KPI ' + t;
+  } else if(mode==='error'){
+    dot.style.background = 'var(--rust)';
+    dot.style.boxShadow = '0 0 8px var(--rust)';
+    dot.style.animation = 'none';
+    lbl.textContent = 'KPI接続エラー';
+  } else if(mode==='loading'){
+    dot.style.background = 'var(--amber)';
+    dot.style.boxShadow = '0 0 8px var(--amber)';
+    dot.style.animation = 'p 1s infinite';
+    lbl.textContent = 'KPI取得中…';
+  } else {
+    dot.style.background = 'var(--ink-3)';
+    dot.style.boxShadow = 'none';
+    dot.style.animation = 'none';
+    lbl.textContent = state.kpi.url ? 'KPI未取得' : 'KPI未接続';
+  }
+}
+async function fetchKpi(){
+  if(!state.kpi.url) throw new Error('KPI URLが未設定です');
+  setKpiStatus('loading');
+  try{
+    const res = await fetch(state.kpi.url, { redirect:'follow' });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const text = await res.text();
+    if(!text || text.length < 5) throw new Error('空のレスポンス');
+    state.kpi.rawData = text;
+    state.kpi.parsed = parseKpiCsv(text);
+    state.kpi.lastFetched = Date.now();
+    state.kpi.lastError = null;
+    save();
+    setKpiStatus('ok');
+    return text;
+  }catch(e){
+    state.kpi.lastError = e.message;
+    save();
+    setKpiStatus('error');
+    throw e;
+  }
+}
+async function fetchKpiManual(){
+  // Save current URL/checkbox first
+  state.kpi.url = document.getElementById('kpiUrl').value.trim();
+  state.kpi.autoInject = document.getElementById('kpiAutoInject').checked;
+  save();
+  if(!state.kpi.url){
+    toast('KPI URLを先に入力してください', true);
+    return;
+  }
+  try{
+    await fetchKpi();
+    toast('KPIデータ取得完了', false);
+    renderKpiPreview();
+  }catch(e){
+    toast('取得失敗: '+e.message, true);
+    renderKpiPreview();
+  }
+}
+function parseCsvLine(line){
+  const result = [];
+  let cur = '';
+  let q = false;
+  for(let i=0; i<line.length; i++){
+    const c = line[i];
+    if(c === '"'){
+      if(q && line[i+1] === '"'){ cur += '"'; i++; }
+      else { q = !q; }
+    } else if(c === ',' && !q){
+      result.push(cur);
+      cur = '';
+    } else {
+      cur += c;
+    }
+  }
+  result.push(cur);
+  return result;
+}
+function parseKpiCsv(csv){
+  if(!csv) return null;
+  const lines = csv.split(/\r?\n/).filter(l=>l.length>0).map(parseCsvLine);
+  if(lines.length === 0) return null;
+  const sections = {};
+  // Strategy 1: column-based ■ markers in any row (header detection)
+  let headerRowIdx = -1;
+  let sectionCols = {};
+  for(let r=0; r<Math.min(5, lines.length); r++){
+    const cols = lines[r];
+    const found = {};
+    cols.forEach((cell, idx)=>{
+      const trimmed = (cell||'').trim();
+      if(trimmed.startsWith('■')){
+        found[idx] = trimmed.replace(/^■\s*/,'');
+      }
+    });
+    if(Object.keys(found).length > Object.keys(sectionCols).length){
+      sectionCols = found;
+      headerRowIdx = r;
+    }
+  }
+  if(Object.keys(sectionCols).length > 0){
+    Object.values(sectionCols).forEach(name=>sections[name] = []);
+    for(let i=headerRowIdx+1; i<lines.length; i++){
+      Object.entries(sectionCols).forEach(([idx, name])=>{
+        const cell = (lines[i][idx]||'').trim();
+        if(cell) sections[name].push(cell);
+      });
+    }
+    return sections;
+  }
+  // Strategy 2: scan any cell for ■, treat as inline section header
+  let lastSection = null;
+  lines.forEach(row=>{
+    row.forEach(cell=>{
+      const trimmed = (cell||'').trim();
+      if(trimmed.startsWith('■')){
+        lastSection = trimmed.replace(/^■\s*/,'');
+        if(!sections[lastSection]) sections[lastSection] = [];
+      } else if(lastSection && trimmed){
+        sections[lastSection].push(trimmed);
+      }
+    });
+  });
+  if(Object.keys(sections).length > 0) return sections;
+  return null;
+}
+function renderKpiStatus(){
+  const el = document.getElementById('kpiStatus');
+  if(!el) return;
+  if(!state.kpi.url){
+    el.innerHTML = '<p class="muted">KPIダッシュボードURLが未設定です。</p>';
+    setKpiStatus('off');
+    return;
+  }
+  if(state.kpi.lastError){
+    el.innerHTML = `<p style="color:var(--rust);font-size:13px">前回取得時エラー: ${escapeHtml(state.kpi.lastError)}</p>`;
+    setKpiStatus('error');
+    return;
+  }
+  if(state.kpi.lastFetched){
+    const t = new Date(state.kpi.lastFetched).toLocaleString('ja-JP');
+    el.innerHTML = `<p style="color:var(--sage);font-size:13px">最終取得: ${t}</p>`;
+    setKpiStatus('ok');
+    return;
+  }
+  el.innerHTML = '<p class="muted">URLは保存済みです。「取得テスト」で動作確認できます。</p>';
+  setKpiStatus('off');
+}
+function renderKpiPreview(){
+  const el = document.getElementById('kpiPreview');
+  if(!el) return;
+  const parsed = state.kpi.parsed;
+  if(!parsed){
+    if(state.kpi.rawData){
+      el.innerHTML = `<details style="margin-top:10px"><summary style="cursor:pointer;font-size:12px;color:var(--ink-2)">取得済データを表示（パース失敗・生CSV）</summary><pre style="font-family:var(--mono);font-size:11px;background:var(--bg);padding:12px;margin-top:8px;max-height:200px;overflow:auto;color:var(--ink-2)">${escapeHtml(state.kpi.rawData.slice(0,2000))}${state.kpi.rawData.length>2000?'\n...(後略)':''}</pre></details>`;
+    } else {
+      el.innerHTML = '';
+    }
+    return;
+  }
+  let html = '<div style="margin-top:10px"><div class="kicker" style="margin-bottom:8px">パース結果プレビュー</div>';
+  Object.entries(parsed).forEach(([name, items])=>{
+    html += `<div style="margin-bottom:10px"><strong style="color:var(--amber-2);font-size:13px">■ ${escapeHtml(name)}</strong> <span class="muted">(${items.length}件)</span><div style="font-size:12px;color:var(--ink-2);margin-top:4px;line-height:1.7">${items.slice(0,8).map(it=>'・'+escapeHtml(it)).join('<br>')}${items.length>8?`<br><span class="muted">…他${items.length-8}件</span>`:''}</div></div>`;
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+// ====== Brand ======
+function renderBrand(){
+  const b = state.brand;
+  document.getElementById('bCompany').value = b.company || '';
+  document.getElementById('bStrengths').value = b.strengths || '';
+  document.getElementById('bTarget').value = b.target || '';
+  document.getElementById('bGoal').value = b.goal || '';
+  document.getElementById('bTone').value = b.tone || '';
+  document.getElementById('bNg').value = b.ng || '';
+  document.getElementById('bProfile').value = b.profile || '';
+  const s = state.strategy || {};
+  document.getElementById('sCoreMessage').value = s.coreMessage || '';
+  document.getElementById('sKeyThemes').value = s.keyThemes || '';
+  document.getElementById('sTriggerWords').value = s.triggerWords || '';
+  document.getElementById('sCta').value = s.cta || '';
+  document.getElementById('sDecisionFlow').value = s.decisionFlow || '';
+  document.getElementById('sPartnerThemes').value = s.partnerThemes || '';
+  document.getElementById('sRouteSalesPlay').value = s.routeSalesPlay || '';
+  document.getElementById('sCustomerAsAdvocate').value = s.customerAsAdvocate || '';
+}
+function saveBrand(){
+  state.brand = {
+    company: document.getElementById('bCompany').value,
+    strengths: document.getElementById('bStrengths').value,
+    target: document.getElementById('bTarget').value,
+    goal: document.getElementById('bGoal').value,
+    tone: document.getElementById('bTone').value,
+    ng: document.getElementById('bNg').value,
+    profile: document.getElementById('bProfile').value
+  };
+  state.strategy = {
+    coreMessage: document.getElementById('sCoreMessage').value,
+    keyThemes: document.getElementById('sKeyThemes').value,
+    triggerWords: document.getElementById('sTriggerWords').value,
+    cta: document.getElementById('sCta').value,
+    decisionFlow: document.getElementById('sDecisionFlow').value,
+    partnerThemes: document.getElementById('sPartnerThemes').value,
+    routeSalesPlay: document.getElementById('sRouteSalesPlay').value,
+    customerAsAdvocate: document.getElementById('sCustomerAsAdvocate').value
+  };
+  save();
+  toast('戦略・ブランド軸を保存しました',false);
+}
+function reloadBrand(){ renderBrand(); }
+
+// ====== Input Form (dynamic per platform) ======
+function renderInputForm(){
+  const c = conf();
+  const p = cur();
+  let html = '';
+  c.inputs.forEach(input=>{
+    const cardCls = input.tone || '';
+    const stored = p.inputs[input.id] || '';
+    html += `<div class="card ${cardCls}">
+      <h3>${escapeHtml(input.label)}</h3>
+      ${input.help?`<p class="muted" style="margin-bottom:14px">${escapeHtml(input.help)}</p>`:''}
+      ${input.type==='text'
+        ? `<input type="text" id="${input.id}" placeholder="${escapeHtml(input.placeholder||'')}" value="${escapeHtml(stored)}">`
+        : `<textarea id="${input.id}" style="min-height:${input.minHeight||100}px" placeholder="${escapeHtml(input.placeholder||'')}">${escapeHtml(stored)}</textarea>`}
+    </div>`;
+  });
+  document.getElementById('inputArea').innerHTML = html;
+  // Save on change
+  c.inputs.forEach(input=>{
+    const el = document.getElementById(input.id);
+    if(el){
+      el.addEventListener('input', ()=>{
+        cur().inputs[input.id] = el.value;
+        save();
+      });
+    }
+  });
+}
+
+function clearInputs(){
+  conf().inputs.forEach(i=>{
+    const el = document.getElementById(i.id);
+    if(el) el.value = '';
+    cur().inputs[i.id] = '';
+  });
+  save();
+}
+
+function loadSampleData(){
+  const p = state.activePlatform;
+  const samples = {
+    x: {
+      inPosts: '図面の段階で違和感ある寸法、止めるかそのまま行くかの線引き。当社は迷わず止める。後で困らせない方が結局早い。 ／ いいね22 ／ Imp 1,820\n納期"無理ですね"より"こうすれば間に合います"を返す。これだけで信頼の積み上がり方が変わる ／ いいね41 ／ Imp 2,650\n品質が荒れる原因は加工じゃなく段取り。これに気づいてから不良率が一桁減った ／ いいね38 ／ Imp 1,420',
+      inTrends: '- 図面ミスで現場が止まった事例が業界紙で複数報道\n- 鋼材値上げで設計仕様変更の相談が増えている雰囲気\n- 「相見積もりだけ送られて困る」発注者側の声がXで散見\n- 設計者の発信で「良い外注先の見分け方」テーマが伸びている',
+      inCompetitors: '- 由紀精密の社長アカウント: 調達担当向けの判断系投稿で反応\n- HILLTOP: 「断る勇気」系投稿が拡散\n- 設計者発信の「外注選びの基準」系コンテンツが安定して伸びる',
+      inDirective: '今週は「事前確認の重要性」を主軸に。実際に止めた案件の話があれば最強'
+    },
+    instagram: {
+      igRecent: '発注前に確認すべき10項目スワイプ ／ いいね180 ／ 保存68 ／ コメント8\n図面の段取りBefore/Afterカルーセル ／ いいね92 ／ 保存32 ／ コメント12\n工場外観夕景 ／ いいね45 ／ 保存2 ／ コメント1\n"段取りで品質が決まる"の解説5枚カルーセル ／ いいね210 ／ 保存88 ／ コメント6\n納期相談で実際に動いたフロー図 ／ いいね72 ／ 保存45 ／ コメント9',
+      igUpcoming: '- 火曜: 図面の事前確認ミーティング撮影OK\n- 水曜: 職人さんの段取りメモ・ホワイトボードを撮影\n- 木曜: 仕様変更相談の対応プロセス(顧客了解済の抽象化版)\n- 金曜: 朝礼で共有された"今週の注意点"ボード',
+      igTrends: '- 「保存される」スワイプ系（チェックリスト・10項目モノ）が伸びている\n- 同業社長アカウントの「断った話」系が反応\n- 図解・情報整理系のリーチが安定\n- "判断"を視覚化したカルーセルが保存されやすい',
+      igDirective: '「判断の辞書」シリーズを今週から始めたい。段取りの可視化中心で'
+    },
+    youtube: {
+      ytPast: '「図面の段階で危ない案件の見抜き方」 ／ 4,200再生 ／ 維持率48% ／ 検索流入好調\n「納期が無理なときに発注者へ返すべき言葉」 ／ 2,800再生 ／ 維持率55% ／ サムネが弱かった\n「品質が荒れる本当の原因は段取り」 ／ 6,400再生 ／ 維持率52% ／ 設計者からのコメント多数',
+      ytTopics: '- 先月、図面の問題に気づいて止めた案件(顧客了解済の抽象化版)\n- 社長の「断る基準」インタビュー\n- 職人による"段取り命"の解説\n- 取引先とのコラボ動画(年6回計画あり)\n- 「発注前に確認すべき10項目」の動画版',
+      ytQuestions: '- 良い外注先の見分け方\n- 発注前に確認すべきポイント\n- 図面だけでは伝わらないこと\n- 仕様変更の正しい伝え方\n- 加工屋と設計者の認識ズレ事例\n- なぜ"止めてくれる会社"が安心なのか',
+      ytDirective: '今週は「判断の辞書」シリーズ長尺1本＋段取り解説Shorts2本'
+    }
+  };
+  const s = samples[p];
+  if(!s) return;
+  Object.entries(s).forEach(([k,v])=>{
+    cur().inputs[k] = v;
+    const el = document.getElementById(k);
+    if(el) el.value = v;
+  });
+  save();
+  toast('サンプルデータを投入しました', false);
+}
+
+// ====== Gemini API ======
+async function callGemini(prompt, expectJson=false){
+  if(!state.api.key) throw new Error('APIキーが未設定です');
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${state.api.model}:generateContent?key=${state.api.key}`;
+  const body = {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: expectJson ? { responseMimeType: 'application/json', temperature: 0.85 } : { temperature: 0.7 }
+  };
+  const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  if(!res.ok){
+    const t = await res.text();
+    throw new Error(`API ${res.status}: ${t.slice(0,200)}`);
+  }
+  const data = await res.json();
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if(!text) throw new Error('空のレスポンス');
+  return text;
+}
+
+// ====== Prompt Builders ======
+function brandBlock(){
+  const b = state.brand;
+  return `# クライアント情報（藤電設工業）
+会社・業種: ${b.company}
+強み: ${b.strengths || '(未入力)'}
+ターゲット: ${b.target || '(未入力)'}
+SNS目標: ${b.goal || '(未入力)'}
+表現トーン: ${b.tone || '(未入力)'}
+NG事項: ${b.ng || '(未入力)'}
+
+# 累積学習プロファイル(全プラットフォーム横断)
+${b.profile || '(まだ蓄積なし)'}`;
+}
+
+function strategyBlock(){
+  const s = state.strategy || {};
+  return `# 藤電設工業 2026広報戦略（クライアント承認済の最重要前提）
+
+## コアメッセージ
+${s.coreMessage || '判断に疲れている人のために、代わりに考え続けている工場。創業57年の加工の上手さではなく、判断の上手さを証明するメディアにする。'}
+
+## 刺さるテーマ（必ず参照すること）
+${s.keyThemes || ''}
+
+## 協力企業向け・刺さるテーマ（取引の体験価値）
+${s.partnerThemes || ''}
+
+## 刺さりワード（投稿に自然に織り込む）
+${s.triggerWords || ''}
+
+## CTA設計
+${s.cta || ''}
+
+## 製造業の意思決定構造（広報の役割の核心）
+${s.decisionFlow || '製造業の意思決定は「探す」より「思い出す」。営業トークの前に、相手の頭の中で"採点"を終わらせておくのが広報の役割。'}
+
+## 広報×ルート営業の戦術（URLを同行させる）
+${s.routeSalesPlay || ''}
+
+## 既存顧客が広報担当者になる（広報の中心コンテンツ）
+${s.customerAsAdvocate || ''}
+
+## ターゲット階層（厳守）
+1. 発注者（最優先）= 設計者・調達担当者。「図面を出す前に相談される」状態を作る
+2. 長期検討者（次点）= 見込客。「迷ったら思い出す会社」になる
+3. 協力企業（3番手）= 既存パートナー。「安心して組める会社」になる
+4. 採用（最低優先・タイミングで変動）= 数より「ズレない人」が来る状態
+
+## KPI再定義（厳守）
+問い合わせ数は見ない。見るのは：指名相談件数／既存顧客からの紹介数／営業なしで話が進む案件数／「藤電設を知っている前提」で始まる商談数。`;
+}
+
+function agentRoleBlock(){
+  return `あなたは株式会社Cc所属のSNS戦略AI「有限会社藤電設工業 担当エージェント」です。
+PMの手塚さんの右腕として、2026年の広報戦略の実行を支援します。
+
+# クライアントの業態（前提）
+有限会社藤電設工業は東京都小平市の精密板金加工工場（1970年創業・57年目）。
+- 主力技術：ステンレス・アルミ・銅・真鍮の精密板金、特に溶接（バフ・ヘアライン仕上げ、YAG溶接）
+- 設備：3次元レーザー、微細レーザー、NCT、切削、旋盤など
+- 受注形態：BtoB特注品中心。1個から特注対応可能
+- ポジション：中小製造業の町工場、判断と段取りで信頼を積む工場
+
+# 戦略上の最重要原則（絶対に逸脱しない）
+1. 「加工の上手さ」ではなく「判断の上手さ」を証明する
+2. 技術自慢・職人技自慢・派手な現場映え・火花スパーク映え・採用色強調 は全て主役にしない（むしろ意図的に避ける）
+3. 主軸は「判断・段取り・リスク回避・事前確認・仕様整理」
+4. ターゲットの最優先は発注者（設計者・調達担当）。次点が長期検討者
+5. 「探す」より「思い出される」。営業トークではなく事前評価を作る
+6. 出口は「問い合わせ」ではなく「相談」（相談していい文化を作る）
+
+# あなたのトンマナ
+- 手塚さんを「手塚さん」と呼ぶ
+- 落ち着いた、プロフェッショナルな秘書感
+- 必ずデータ根拠を添える
+- 「〜と推奨します」「〜が望ましいかと」など丁寧な提案口調
+- 結論ファースト、根拠は後置
+- 派手な比喩を避ける、判断軸のリアリズム
+- 専門用語（YAG溶接、ヘアライン、3次元レーザー等）は使うが、それ自体を主張しない（あくまで判断や段取りの話の中で自然に出す）`;
+}
+
+function historyBlock(){
+  const recent = cur().history.slice(0,5).map(h=>`- ${h.date}: ${h.summary}`).join('\n');
+  return recent || '(履歴なし)';
+}
+
+function kpiBlock(){
+  if(!state.kpi || !state.kpi.parsed && !state.kpi.rawData) return '';
+  const fetchedAt = state.kpi.lastFetched ? new Date(state.kpi.lastFetched).toLocaleString('ja-JP') : '取得時刻不明';
+  let body = '';
+  if(state.kpi.parsed && Object.keys(state.kpi.parsed).length > 0){
+    body = Object.entries(state.kpi.parsed).map(([name, items])=>{
+      const list = items.slice(0, 30).map(it=>'- '+it).join('\n');
+      return `## ${name}\n${list}${items.length>30?`\n…他${items.length-30}件`:''}`;
+    }).join('\n\n');
+  } else if(state.kpi.rawData){
+    body = '(構造化解析できなかったため生データを抜粋)\n' + state.kpi.rawData.slice(0, 3000);
+  }
+  return `\n# 藤電設工業 KPIダッシュボード（最新データ・取得: ${fetchedAt}）\n${body}\n\n上記KPIダッシュボードのキーワード・ターゲット・指標は、藤電設工業のクライアント側で日々更新されています。本日の戦略提案・投稿企画は、必ずこの最新KPIに整合するように組み立ててください。\n`;
+}
+
+function buildPromptX(){
+  const i = cur().inputs;
+  return `${agentRoleBlock()}
+
+${brandBlock()}
+
+${strategyBlock()}
+${kpiBlock()}
+# 直近のX運用履歴
+${historyBlock()}
+
+# 本日の入力データ（X）
+## 前日の投稿実績
+${i.inPosts || '(なし)'}
+
+## 業界トピック・トレンド
+${i.inTrends || '(なし)'}
+
+## 競合・ベンチマーク
+${i.inCompetitors || '(なし)'}
+
+## 手塚さんからの指示
+${i.inDirective || '(特になし)'}
+
+# 社長個人Xアカウントとしての運用特性（2026戦略準拠）
+- 役割：設計・調達・経営者の頭に「藤電設工業 = 判断がちゃんとしてる会社」を刷り込むこと（指名検索の土台）
+- 投稿頻度：週3回以上
+- アカウント主体：社長個人（法人公式ではない）。一人称・経営者目線・現場の判断者目線で語る
+- バズより想起獲得が目的。1投稿いいね10〜30が当たりのレンジ
+- 主たる読者: 設計者・調達担当・経営者
+- 効くフォーマット：
+  - 「先週、図面のXXに気づいて止めた話」という抽象化された判断エピソード
+  - 「納期"無理"と言わずに代替案を返す思考」のような短いフレームワーク
+  - 「品質が荒れる原因は加工じゃなく段取り」のような結論ファースト
+  - 「相見積もりだけ送られて困る発注者へ」のような共感ヘッダー
+- 刺さりワード：段取り／リスク／事前確認／仕様整理／"事故らない"／"後で困らない"／"やり直しを防ぐ"
+- 絶対に避ける（戦略上の地雷）:
+  - 「うちの溶接技術がすごい」「職人の手元映え」「火花スパーク映え」のような技術自慢
+  - 「採用してます」「若手募集」のような採用訴求
+  - 営業っぽさ（「お見積もりはこちらまで」「お気軽に」など）
+  - 同業批判、機密性のある具体顧客名
+
+# 出力（JSON厳守、JSON以外の前置き後置き禁止）
+
+{
+  "greeting": "朝の挨拶＋本日の概要を3〜4文。手塚さんへの呼びかけから始める。",
+  "yesterday": {
+    "summary": "前日のXパフォーマンス総評(2〜3文、数値根拠込み)",
+    "best_post": "最も伸びた投稿の特定と、なぜ伸びたかの仮説(1〜2文)。判断系/段取り系コンテンツへの反応を特に見る",
+    "insights": ["箇条書きで2〜3つの気づき。発注者・長期検討者の反応が読み取れるものを優先"]
+  },
+  "trend": {
+    "summary": "業界トレンド・調達/設計界隈の動きの要約(2〜3文)",
+    "opportunity": "今日特に活かせる切り口(1〜2文)。判断軸で勝負できるトピックを優先"
+  },
+  "strategy": {
+    "direction": "本日のX投稿戦略方針(1文で結論)。「判断・段取り・リスク回避・事前確認・仕様整理」のいずれかが軸",
+    "rationale": "なぜこの方針か(2〜3文)。発注者/長期検討者のどちらに効くかも明示",
+    "risks": ["注意すべきリスク・違和感、1〜2項目"]
+  },
+  "drafts": [
+    {
+      "approach": "切り口の名称(例: 図面を止めた話 / 段取り思考 / 納期断り方 / 仕様整理代行 / 良い外注先の見分け方 / 発注前の確認項目 など、必ず判断軸の話。技術自慢系・採用系は禁止)",
+      "text": "実際のX投稿本文(140字以内推奨、改行込みで自然に)。社長個人の一人称で。結論ファースト・刺さりワードを自然に織り込む",
+      "hashtags": "#〜 #〜 (3〜5個。製造業・板金・調達など、ただし無理に多くしない)",
+      "best_time": "推奨投稿時刻(例: 7:30 / 12:30 / 19:00)",
+      "rationale": "この案を出した理由(1〜2文)。どのターゲット階層(発注者/長期検討者/協力企業)に効くかを明示"
+    }
+  ],
+  "weekly_note": "1週間スパンで気になっていること、来週への布石(1〜2文)。なければ空文字。",
+  "profile_update": "今日の運用から累積学習プロファイルに追記すべき1行(なければ空文字)"
+}
+
+drafts配列は必ず3つ、異なる切り口で。すべて「判断・段取り・リスク・事前確認」軸であること。`;
+}
+
+function buildPromptInstagram(){
+  const i = cur().inputs;
+  return `${agentRoleBlock()}
+
+${brandBlock()}
+
+${strategyBlock()}
+${kpiBlock()}
+# 直近のIG運用履歴
+${historyBlock()}
+
+# 本日の入力データ（Instagram）
+## 直近のIG投稿実績
+${i.igRecent || '(なし)'}
+
+## 今週の工場での撮影候補・出荷予定
+${i.igUpcoming || '(なし)'}
+
+## 町工場・製造業系IGのトレンド
+${i.igTrends || '(なし)'}
+
+## 手塚さんからの指示
+${i.igDirective || '(特になし)'}
+
+# Instagram運用の特性（2026戦略準拠・長期検討者向け）
+- 役割：藤電設工業のことを理解できるコンテンツで「迷ったら思い出す会社」になる（長期検討者の刈り取り）
+- 投稿頻度：週3回
+- 主たる読者: 長期検討者（迷っている見込客）、設計者・調達担当
+- 主要KPI: **保存数**（いちばん重要）、リーチ、ホーム流入。いいねは副次
+- 効くフォーマット（戦略上の主軸）:
+  1. 「保存される」スワイプカルーセル系：チェックリスト・10項目モノ・"判断の辞書"系
+  2. 図解・情報整理系：段取りBefore/After、フロー図、確認項目の見える化
+  3. 判断エピソード系：図面を止めた話、納期を断った話、仕様整理を代行した話の抽象化版
+- 絶対に主役にしない（戦略上の地雷）:
+  - 「金属の質感」「光の反射」「火花・スパーク映え」「職人の手元アップ」「設備機械美」のような技術自慢ビジュアル
+  - 採用色を前面に出した投稿
+  - 派手なReelsで火花を見せるような映え狙い
+  - これらは絶対NGではないが、主役にはしない（補助的に判断系の中で使う程度）
+- 想定タグ群（戦略軸で組み直し）:
+  - 大タグ例: #製造業 #ものづくり #町工場 #BtoB
+  - 中タグ例: #精密板金 #金属加工 #調達 #購買 #設計者向け
+  - 小タグ例: #発注前確認 #段取り #判断の辞書 #事前確認 #仕様整理 #小平市
+
+# 出力（JSON厳守、JSON以外の前置き後置き禁止）
+
+{
+  "greeting": "今週のIG運用に向けた挨拶＋概要を3〜4文。手塚さんへの呼びかけから始める。",
+  "yesterday": {
+    "summary": "直近IG投稿の総評(2〜3文、保存数・リーチ重視で)",
+    "best_post": "最も保存された投稿と要因(1〜2文)。判断系/情報整理系がどう刺さったか",
+    "insights": ["気づき2〜3つ。長期検討者の心に残る要素を抽出"]
+  },
+  "trend": {
+    "summary": "製造業系IGトレンドの要約(2〜3文)",
+    "opportunity": "今週特に試したい切り口(1〜2文)。「保存される」フォーマットを優先"
+  },
+  "strategy": {
+    "direction": "今週のIG運用方針(1文で結論)。「判断の辞書」「段取りの可視化」「リスク事前確認」のいずれかが軸",
+    "rationale": "なぜこの方針か(2〜3文)。長期検討者の記憶に残る理由も明示",
+    "risks": ["注意点1〜2項目"]
+  },
+  "drafts": [
+    {
+      "approach": "切り口の名称(例: 発注前チェックリスト / 段取り解説カルーセル / 判断エピソード抽象化 / 図面を止めた話 / 仕様整理代行の解説 など、必ず判断軸。技術自慢系・採用系は禁止)",
+      "format": "投稿フォーマット(例: スワイプカルーセル7枚 / 単投稿+図解 / 短いReels)。保存されやすいフォーマット優先",
+      "shooting_brief": "撮影／制作ブリーフ。写真撮影が必要なら何を、または図解／グラフィックなら何をどう作るか具体的に(3〜5文)",
+      "key_shots": "必須カット／構成(箇条書き的に1段落で)。カルーセルの場合は各スライドの内容",
+      "caption_hook": "キャプションの最初の2行(投稿文一覧で見える部分。発注者・長期検討者の心に響く短いフック)",
+      "caption_body": "キャプション本文(150〜300字、結論ファースト・判断軸の語り口で)",
+      "caption_cta": "末尾のCTA(任意。「保存推奨」や「相談導線」へ誘導。問い合わせCTA禁止)",
+      "hashtags_big": "大タグ4〜6個(投稿数100万以上、ジャンル系。例: #製造業 #ものづくり #町工場)",
+      "hashtags_mid": "中タグ6〜10個(投稿数1〜100万、テーマ系。例: #精密板金 #調達 #設計者向け)",
+      "hashtags_small": "小タグ3〜6個(投稿数1万以下、戦略軸。例: #発注前確認 #判断の辞書 #段取り)",
+      "best_time": "推奨投稿時刻(IGは19:00-21:00や12:00-13:00が狙い目)",
+      "story_followup": "投稿後のストーリーズで仕掛ける追補案(1〜2文)",
+      "rationale": "この案の戦略的意義(1〜2文)。長期検討者の心にどう残るか明示"
+    }
+  ],
+  "weekly_note": "来週への布石(1〜2文)。なければ空文字。",
+  "profile_update": "学習プロファイルに追記すべき1行(なければ空文字)"
+}
+
+drafts配列は必ず3つ、異なる撮影テーマで。撮影ブリーフは工場の現場で再現できる粒度で書くこと。`;
+}
+
+function buildPromptYouTube(){
+  const i = cur().inputs;
+  return `${agentRoleBlock()}
+
+${brandBlock()}
+
+${strategyBlock()}
+${kpiBlock()}
+# 直近のYouTube運用履歴
+${historyBlock()}
+
+# 本日の入力データ（YouTube）
+## 過去動画のパフォーマンス
+${i.ytPast || '(なし)'}
+
+## 取材・撮影可能なテーマ
+${i.ytTopics || '(なし)'}
+
+## 業界でよく聞かれる質問・関心事
+${i.ytQuestions || '(なし)'}
+
+## 手塚さんからの指示
+${i.ytDirective || '(特になし)'}
+
+# YouTube運用の特性（2026戦略準拠・公式アカウント・週1配信）
+- 役割：検索される・指名される状態を作る。モノづくりが大好きな人向けに「藤電設工業=判断がちゃんとしてる工場」を浸透
+- 投稿頻度：週1回（年6回のYouTubeコラボあり、これは別ライン）
+- 1本あたりの労力が大きい。企画段階で勝負がほぼ決まる
+- タイトル＋サムネが80%。中身がよくてもクリックされなければ意味がない
+- 維持率45%以上なら成功ライン
+- 主たる読者: 設計者・調達担当者（発注者）、長期検討者、モノづくり好き
+
+- 戦略上の3大テーマ（必ずこの優先順位）:
+  1) **判断の辞書系（最優先）**：「良い外注先の見分け方」「発注前に確認すべき10項目」「図面だけでは伝わらないこと」「仕様変更の正しい伝え方」「加工屋と設計者の認識ズレ」など、長期検討者が検索する判断軸テーマ
+  2) **判断エピソード系（次点）**：「先月、図面を止めた話」「納期断りを最適化した話」「仕様整理を代行した話」を抽象化した実話ドキュメンタリー
+  3) **コラボ動画（年6回・指名検索ブースト）**：取引先・業界の人とのコラボ。発注者・協力企業どちらにも効く
+
+- Shorts(60秒以内)も判断軸で組む：「3秒で発注前に確認すべきこと」のような情報密度の高いものに。火花スパーク映え単体は避ける（戦略地雷）
+
+- 絶対に避ける（戦略上の地雷）:
+  - 「YAG溶接とは何か」「ヘアラインとバフの違い」など純粋な技術解説の単独企画（判断軸の中で出すならOK）
+  - 「職人の手元密着」を主役にした映像（判断シーンの脇役ならOK）
+  - 火花スパーク映えのShorts単体
+  - 採用ブランディング目的の動画
+  - 工場ツアーのみ・設備紹介のみの企画
+- 同業ベンチマーク: 由紀精密、HILLTOPなどの判断軸／断る勇気系の発信を参考に
+
+# 出力（JSON厳守、JSON以外の前置き後置き禁止）
+
+{
+  "greeting": "今週のYouTube運用に向けた挨拶＋概要を3〜4文。",
+  "yesterday": {
+    "summary": "過去動画の総評(2〜3文、再生数と維持率)。判断系コンテンツがどう刺さったかを特に見る",
+    "best_post": "最も成功した動画と要因(1〜2文)",
+    "insights": ["気づき2〜3つ。タイトル/サムネ/構成のどこが効いたか"]
+  },
+  "trend": {
+    "summary": "YouTube・製造業系の発信動向(2〜3文)",
+    "opportunity": "今週特に活かせる切り口(1〜2文)。判断軸で勝負できるテーマを優先"
+  },
+  "strategy": {
+    "direction": "今週のYouTube方針(1文で結論)。判断の辞書系/判断エピソード系/コラボのいずれかが軸",
+    "rationale": "なぜこの方針か(2〜3文)。発注者/長期検討者のどちらに効くかも明示",
+    "risks": ["注意点1〜2項目"]
+  },
+  "drafts": [
+    {
+      "approach": "企画の核(例: 判断の辞書/良い外注先の見分け方 / 判断エピソード/図面を止めた話 / 段取り解説 / 仕様整理代行解説 など、必ず判断軸。技術解説単体・職人密着単体・採用系は禁止)",
+      "format": "形式(長尺8-12分 / 長尺3-5分 / Shorts 60秒以内)",
+      "concept": "企画コンセプト(2〜3文。誰に何を伝える動画か)。発注者・長期検討者のどちら向けか明示",
+      "title_options": ["タイトル候補1(検索流入重視・How to系)", "候補2(クリック率重視・断言型)", "候補3(共感喚起型・"困る前に"系)"],
+      "thumbnail_concept": "サムネコンセプト。構図・配色・テキストオーバーレイ(2〜3文で具体的に)。判断・段取り・リスクを示唆する要素中心。火花スパーク映えは主役にしない",
+      "structure": "動画構成。フック(0-15秒) → 展開 → CTAの流れを1段落で。CTAは「相談していい」へ寄せる",
+      "key_shots": "撮影必須カット(箇条書き的に)。判断・段取りシーンを中心に",
+      "description": "概要欄テキスト案(SEO込みで300〜500字。冒頭2行が最も効く)。「判断」「段取り」「事前確認」系キーワードを自然に含める",
+      "tags": "YouTubeタグ案(8〜12個、半角カンマ区切り。精密板金/調達/設計/発注前確認/外注先選び など、判断軸キーワード優先)",
+      "rationale": "この企画の戦略的意義(2〜3文)。広報戦略のどの部分を強化するか明示"
+    }
+  ],
+  "weekly_note": "翌週以降への布石(1〜2文)。なければ空文字。",
+  "profile_update": "学習プロファイルに追記すべき1行(なければ空文字)"
+}
+
+drafts配列は必ず3つ、異なる企画で。すべて判断軸であること。指示で長尺/Shortsの本数指定がある場合はそれに従う。`;
+}
+
+function buildPrompt(){
+  if(state.activePlatform==='x') return buildPromptX();
+  if(state.activePlatform==='instagram') return buildPromptInstagram();
+  if(state.activePlatform==='youtube') return buildPromptYouTube();
+}
+
+// ====== Generate ======
+async function generateBriefing(){
+  if(!state.api.key){
+    toast('まず「設定」タブでAPIキーを保存してください',true);
+    setTab('settings'); return;
+  }
+  // Save current input values
+  conf().inputs.forEach(i=>{
+    const el = document.getElementById(i.id);
+    if(el) cur().inputs[i.id] = el.value;
+  });
+  save();
+
+  // Validate has at least one input
+  const hasContent = Object.values(cur().inputs).some(v=> v && v.trim().length>0);
+  if(!hasContent){
+    toast('まず最低1項目データを入力してください',true);
+    return;
+  }
+
+  setTab('briefing');
+  document.getElementById('briefingArea').innerHTML = '<div class="loading"><div class="spinner"></div>エージェントが分析中です。30〜90秒ほどお待ちください…</div>';
+
+  // KPI auto-fetch (if enabled and URL set)
+  if(state.kpi.url && state.kpi.autoInject !== false){
+    document.getElementById('briefingArea').innerHTML = '<div class="loading"><div class="spinner"></div>KPIダッシュボードの最新データを取得中…</div>';
+    try{
+      await fetchKpi();
+    }catch(e){
+      // 取得失敗してもブリーフィングは続行（前回のキャッシュがあればそれを使う）
+      toast('KPI取得に失敗しました（前回データで続行）: '+e.message, true);
+    }
+    document.getElementById('briefingArea').innerHTML = '<div class="loading"><div class="spinner"></div>エージェントが分析中です。30〜90秒ほどお待ちください…</div>';
+  }
+
+  try{
+    const prompt = buildPrompt();
+    const raw = await callGemini(prompt, true);
+    let data;
+    try{ data = JSON.parse(raw); }
+    catch(e){
+      const m = raw.match(/\{[\s\S]*\}/);
+      if(m) data = JSON.parse(m[0]);
+      else throw new Error('JSON解析失敗: '+raw.slice(0,200));
+    }
+
+    cur().lastBriefing = data;
+    cur().lastDrafts = (data.drafts||[]).map((d,i)=>({...d, id: 'd'+Date.now()+i, status:'pending'}));
+
+    cur().history.unshift({
+      date: new Date().toISOString().slice(0,10),
+      summary: data.strategy?.direction || '(方針未設定)',
+      drafts_count: cur().lastDrafts.length,
+      full: data
+    });
+    cur().history = cur().history.slice(0,90);
+
+    if(data.profile_update && data.profile_update.trim()){
+      const today = new Date().toISOString().slice(0,10);
+      const tag = `[${today}/${conf().label}]`;
+      state.brand.profile = (state.brand.profile||'').trim();
+      if(state.brand.profile) state.brand.profile += '\n';
+      state.brand.profile += `${tag} ${data.profile_update.trim()}`;
+    }
+
+    save();
+    renderBriefing(data);
+    renderDrafts();
+    toast('ブリーフィング生成完了',false);
+  }catch(e){
+    document.getElementById('briefingArea').innerHTML = `<div class="card card-rust"><h3>生成エラー</h3><p style="color:var(--ink-2)">${escapeHtml(e.message)}</p><div style="margin-top:14px"><button class="btn btn-ghost" onclick="generateBriefing()">再試行</button></div></div>`;
+    toast('生成に失敗: '+e.message, true);
+  }
+}
+
+// ====== Render Briefing ======
+function renderBriefing(d){
+  const area = document.getElementById('briefingArea');
+  if(!d){
+    area.innerHTML = `<div class="empty">
+      <div class="empty-mark">序</div>
+      <p>「データ投入」タブからデータをご入力後、ブリーフィング生成を実行してください。</p>
+      <div style="margin-top:20px"><button class="btn btn-primary" onclick="setTab('input')">データ投入へ</button></div>
+    </div>`;
+    return;
+  }
+  const today = fmtDate(new Date());
+  const platLabel = conf().name;
+
+  let html = `<div class="briefing-greeting">
+    <div class="date">${today} / ${platLabel}</div>
+    <div class="text">${escapeHtml(d.greeting||'')}</div>
+  </div>`;
+
+  if(d.yesterday){
+    html += `<div class="card card-amber">
+      <div class="kicker">直近のパフォーマンス</div>
+      <p style="margin-bottom:14px;line-height:1.85">${escapeHtml(d.yesterday.summary||'')}</p>`;
+    if(d.yesterday.best_post){
+      html += `<div style="padding:14px;background:var(--bg-3);border-left:2px solid var(--amber);margin-bottom:14px;font-size:13px;line-height:1.8">${escapeHtml(d.yesterday.best_post)}</div>`;
+    }
+    if(d.yesterday.insights && d.yesterday.insights.length){
+      html += '<div style="margin-top:10px">';
+      d.yesterday.insights.forEach((it,i)=>{
+        html += `<div class="insight"><span class="insight-mark">${romanize(i+1)}.</span><span class="insight-text">${escapeHtml(it)}</span></div>`;
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+
+  if(d.trend){
+    html += `<div class="card card-sage">
+      <div class="kicker">業界トレンド × ポジション</div>
+      <p style="margin-bottom:12px;line-height:1.85">${escapeHtml(d.trend.summary||'')}</p>
+      ${d.trend.opportunity?`<p style="color:var(--sage);font-size:14px;line-height:1.8"><strong style="color:var(--sage);font-family:var(--serif-en);font-size:11px;letter-spacing:.2em">OPPORTUNITY</strong><br>${escapeHtml(d.trend.opportunity)}</p>`:''}
+    </div>`;
+  }
+
+  if(d.strategy){
+    html += `<div class="card" style="border-left:3px solid var(--amber-2)">
+      <div class="kicker">戦略方針</div>
+      <h3 style="font-size:18px;color:var(--ink);margin-bottom:14px">${escapeHtml(d.strategy.direction||'')}</h3>
+      <p style="color:var(--ink-2);line-height:1.85;margin-bottom:14px">${escapeHtml(d.strategy.rationale||'')}</p>`;
+    if(d.strategy.risks && d.strategy.risks.length){
+      html += '<div style="margin-top:10px;padding-top:14px;border-top:1px dashed var(--line)"><div class="kicker">注意事項</div>';
+      d.strategy.risks.forEach(r=>{
+        html += `<div style="font-size:13px;color:var(--ink-2);line-height:1.7;margin-bottom:6px">— ${escapeHtml(r)}</div>`;
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+
+  if(d.weekly_note && d.weekly_note.trim()){
+    html += `<div class="card">
+      <div class="kicker">先への布石</div>
+      <p style="color:var(--ink-2);line-height:1.85">${escapeHtml(d.weekly_note)}</p>
+    </div>`;
+  }
+
+  const draftCount = cur().lastDrafts.length;
+  html += `<div style="text-align:center;margin-top:32px;padding:24px;border:1px dashed var(--line)">
+    <div class="kicker" style="margin-bottom:8px">Next Action</div>
+    <p style="color:var(--ink-2);margin-bottom:16px">${draftCount}件の${state.activePlatform==='x'?'投稿案':state.activePlatform==='instagram'?'撮影ブリーフ':'動画企画'}をご用意しました。</p>
+    <button class="btn btn-primary" onclick="setTab('drafts')">企画／投稿案へ</button>
+  </div>`;
+
+  area.innerHTML = html;
+}
+
+// ====== Render Drafts (platform-specific) ======
+function renderDrafts(){
+  const area = document.getElementById('draftsArea');
+  const drafts = cur().lastDrafts || [];
+  if(drafts.length===0){
+    area.innerHTML = '<div class="empty"><div class="empty-mark">空</div><p>ブリーフィング生成と同時に作成されます。</p></div>';
+    return;
+  }
+  const renderer = {
+    x: renderDraftX,
+    instagram: renderDraftIG,
+    youtube: renderDraftYT
+  }[state.activePlatform];
+
+  area.innerHTML = drafts.map((d,i)=>renderer(d,i,drafts.length)).join('');
+}
+
+function renderDraftX(d, i, total){
+  const cls = `draft ${d.status==='approved'?'approved':''} ${d.status==='rejected'?'rejected':''}`;
+  return `<div class="${cls}" id="${d.id}">
+    <div class="draft-header">
+      <span class="draft-tag">${escapeHtml(d.approach||'案 '+(i+1))}</span>
+      <span class="muted">案 ${i+1} / ${total}</span>
+    </div>
+    <div class="draft-text" contenteditable="true" oninput="updateDraftField(${i},'text',this.innerText)">${escapeHtml(d.text||'')}</div>
+    <div class="draft-meta">
+      <div><strong>ハッシュタグ</strong>${escapeHtml(d.hashtags||'')}</div>
+      <div><strong>推奨投稿時刻</strong>${escapeHtml(d.best_time||'—')}</div>
+    </div>
+    ${d.rationale?`<div class="draft-rationale">${escapeHtml(d.rationale)}</div>`:''}
+    <div class="draft-actions">
+      <button class="btn btn-primary btn-sm" onclick="approveDraft(${i})">承認</button>
+      <button class="btn btn-sm" onclick="copyDraftX(${i})">本文＋ハッシュタグをコピー</button>
+      <button class="btn btn-sm" onclick="postOnX(${i})">Xに投稿画面で開く</button>
+      <button class="btn btn-ghost btn-sm" onclick="rejectDraft(${i})" style="color:var(--rust)">却下</button>
+    </div>
+  </div>`;
+}
+
+function renderDraftIG(d, i, total){
+  const cls = `draft ${d.status==='approved'?'approved':''} ${d.status==='rejected'?'rejected':''}`;
+  return `<div class="${cls}" id="${d.id}">
+    <div class="draft-header">
+      <span class="draft-tag">${escapeHtml(d.approach||'案 '+(i+1))}</span>
+      <span class="muted">${escapeHtml(d.format||'')} ／ 案 ${i+1} / ${total}</span>
+    </div>
+
+    <div class="draft-section">
+      <div class="draft-section-title">撮影ブリーフ</div>
+      <div class="draft-section-body">${escapeHtml(d.shooting_brief||'')}</div>
+    </div>
+
+    ${d.key_shots?`<div class="draft-section">
+      <div class="draft-section-title">必須カット／構成</div>
+      <div class="draft-section-body">${escapeHtml(d.key_shots)}</div>
+    </div>`:''}
+
+    <div class="draft-section">
+      <div class="draft-section-title">キャプション(冒頭2行＝フィード一覧で見える)</div>
+      <div class="draft-text" contenteditable="true" oninput="updateDraftField(${i},'caption_hook',this.innerText)">${escapeHtml(d.caption_hook||'')}</div>
+    </div>
+
+    <div class="draft-section">
+      <div class="draft-section-title">キャプション本文</div>
+      <div class="draft-text" contenteditable="true" oninput="updateDraftField(${i},'caption_body',this.innerText)">${escapeHtml(d.caption_body||'')}</div>
+    </div>
+
+    ${d.caption_cta?`<div class="draft-section">
+      <div class="draft-section-title">CTA</div>
+      <div class="draft-section-body">${escapeHtml(d.caption_cta)}</div>
+    </div>`:''}
+
+    <div class="draft-section">
+      <div class="draft-section-title">ハッシュタグ戦略</div>
+      <div class="hashtag-group">
+        <div class="hashtag-row"><span class="hashtag-label">大タグ</span><span class="hashtag-text">${escapeHtml(d.hashtags_big||'')}</span></div>
+        <div class="hashtag-row"><span class="hashtag-label">中タグ</span><span class="hashtag-text">${escapeHtml(d.hashtags_mid||'')}</span></div>
+        <div class="hashtag-row"><span class="hashtag-label">小タグ</span><span class="hashtag-text">${escapeHtml(d.hashtags_small||'')}</span></div>
+      </div>
+    </div>
+
+    <div class="draft-meta">
+      <div><strong>推奨投稿時刻</strong>${escapeHtml(d.best_time||'—')}</div>
+      <div><strong>ストーリーズ追補</strong>${escapeHtml(d.story_followup||'—')}</div>
+    </div>
+
+    ${d.rationale?`<div class="draft-rationale">${escapeHtml(d.rationale)}</div>`:''}
+
+    <div class="draft-actions">
+      <button class="btn btn-primary btn-sm" onclick="approveDraft(${i})">承認</button>
+      <button class="btn btn-sm" onclick="copyDraftIG(${i})">キャプション全体をコピー</button>
+      <button class="btn btn-sm" onclick="copyDraftIGBrief(${i})">撮影ブリーフをコピー</button>
+      <button class="btn btn-ghost btn-sm" onclick="rejectDraft(${i})" style="color:var(--rust)">却下</button>
+    </div>
+  </div>`;
+}
+
+function renderDraftYT(d, i, total){
+  const cls = `draft ${d.status==='approved'?'approved':''} ${d.status==='rejected'?'rejected':''}`;
+  const titles = (d.title_options||[]).map((t,n)=>`<div class="title-option" onclick="copyText('${escapeAttr(t)}')"><span class="title-option-num">候補 ${n+1}</span>${escapeHtml(t)}</div>`).join('');
+  return `<div class="${cls}" id="${d.id}">
+    <div class="draft-header">
+      <span class="draft-tag">${escapeHtml(d.approach||'企画 '+(i+1))}</span>
+      <span class="muted">${escapeHtml(d.format||'')} ／ 企画 ${i+1} / ${total}</span>
+    </div>
+
+    <div class="draft-section">
+      <div class="draft-section-title">企画コンセプト</div>
+      <div class="draft-section-body">${escapeHtml(d.concept||'')}</div>
+    </div>
+
+    <div class="draft-section">
+      <div class="draft-section-title">タイトル候補(クリックでコピー)</div>
+      <div class="title-options">${titles}</div>
+    </div>
+
+    <div class="draft-section">
+      <div class="draft-section-title">サムネコンセプト</div>
+      <div class="draft-section-body">${escapeHtml(d.thumbnail_concept||'')}</div>
+    </div>
+
+    <div class="draft-section">
+      <div class="draft-section-title">動画構成</div>
+      <div class="draft-section-body">${escapeHtml(d.structure||'')}</div>
+    </div>
+
+    ${d.key_shots?`<div class="draft-section">
+      <div class="draft-section-title">必須カット</div>
+      <div class="draft-section-body">${escapeHtml(d.key_shots)}</div>
+    </div>`:''}
+
+    <div class="draft-section">
+      <div class="draft-section-title">概要欄(SEO込み)</div>
+      <div class="draft-text" contenteditable="true" oninput="updateDraftField(${i},'description',this.innerText)" style="min-height:120px">${escapeHtml(d.description||'')}</div>
+    </div>
+
+    <div class="draft-section">
+      <div class="draft-section-title">タグ</div>
+      <div class="draft-section-body" style="font-family:var(--mono);font-size:13px;color:var(--ink-2)">${escapeHtml(d.tags||'')}</div>
+    </div>
+
+    ${d.rationale?`<div class="draft-rationale">${escapeHtml(d.rationale)}</div>`:''}
+
+    <div class="draft-actions">
+      <button class="btn btn-primary btn-sm" onclick="approveDraft(${i})">承認</button>
+      <button class="btn btn-sm" onclick="copyDraftYT(${i})">企画書全体をコピー</button>
+      <button class="btn btn-sm" onclick="copyText(${JSON.stringify(d.description||'').replace(/"/g,'&quot;')})">概要欄をコピー</button>
+      <button class="btn btn-ghost btn-sm" onclick="rejectDraft(${i})" style="color:var(--rust)">却下</button>
+    </div>
+  </div>`;
+}
+
+// ====== Draft actions ======
+function updateDraftField(i, field, value){
+  cur().lastDrafts[i][field] = value;
+  save();
+}
+function approveDraft(i){
+  cur().lastDrafts[i].status = 'approved';
+  save();
+  renderDrafts();
+  toast('案'+(i+1)+'を承認しました',false);
+}
+function rejectDraft(i){
+  cur().lastDrafts[i].status = 'rejected';
+  save();
+  renderDrafts();
+}
+function copyText(text){
+  navigator.clipboard.writeText(text);
+  toast('コピーしました', false);
+}
+function copyDraftX(i){
+  const d = cur().lastDrafts[i];
+  copyText((d.text||'') + (d.hashtags?'\n\n'+d.hashtags:''));
+}
+function postOnX(i){
+  const d = cur().lastDrafts[i];
+  const text = (d.text||'') + (d.hashtags?'\n\n'+d.hashtags:'');
+  window.open('https://x.com/intent/post?text=' + encodeURIComponent(text), '_blank');
+}
+function copyDraftIG(i){
+  const d = cur().lastDrafts[i];
+  const tags = [d.hashtags_big, d.hashtags_mid, d.hashtags_small].filter(x=>x).join(' ');
+  const text = `${d.caption_hook||''}\n\n${d.caption_body||''}\n\n${d.caption_cta||''}\n\n.\n.\n.\n${tags}`;
+  copyText(text);
+}
+function copyDraftIGBrief(i){
+  const d = cur().lastDrafts[i];
+  const text = `【撮影ブリーフ：${d.approach||''}】\n形式: ${d.format||''}\n\n${d.shooting_brief||''}\n\n■必須カット\n${d.key_shots||''}\n\n■推奨投稿時刻\n${d.best_time||''}`;
+  copyText(text);
+}
+function copyDraftYT(i){
+  const d = cur().lastDrafts[i];
+  const text = `【YouTube企画書：${d.approach||''}】\n形式: ${d.format||''}\n\n■コンセプト\n${d.concept||''}\n\n■タイトル候補\n${(d.title_options||[]).map((t,n)=>`${n+1}. ${t}`).join('\n')}\n\n■サムネコンセプト\n${d.thumbnail_concept||''}\n\n■構成\n${d.structure||''}\n\n■必須カット\n${d.key_shots||''}\n\n■概要欄\n${d.description||''}\n\n■タグ\n${d.tags||''}`;
+  copyText(text);
+}
+
+// ====== History ======
+function renderHistory(){
+  const area = document.getElementById('historyArea');
+  const hist = cur().history;
+  if(!hist.length){
+    area.innerHTML = '<div class="empty"><div class="empty-mark">序</div><p>まだ運用履歴がありません。</p></div>';
+    return;
+  }
+  let html = '<div class="card">';
+  hist.forEach(h=>{
+    const drafts = h.full?.drafts || [];
+    const approved = (cur().lastDrafts||[]).filter(d=>d.status==='approved').length;
+    html += `<div class="hist-row">
+      <div class="hist-date">${escapeHtml(h.date)}</div>
+      <div class="hist-text">${escapeHtml(h.summary)}</div>
+      <div class="hist-tag">${h.drafts_count||drafts.length||0}案</div>
+    </div>`;
+  });
+  html += '</div>';
+  html += `<div class="btn-row" style="margin-top:18px"><button class="btn btn-ghost" onclick="if(confirm('${conf().name}の履歴を全消去しますか？')){cur().history=[];save();renderHistory();}" style="color:var(--rust)">${conf().name}の履歴を全消去</button></div>`;
+  area.innerHTML = html;
+}
+
+// ====== Export/Import ======
+function exportAll(){
+  const data = JSON.parse(JSON.stringify(state));
+  delete data.api.key;
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `fujidensetsu_sns_agent_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+function importAll(e){
+  const f = e.target.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = ()=>{
+    try{
+      const d = JSON.parse(r.result);
+      if(confirm('現在のデータに上書きします。よろしいですか？(APIキーは保持されます)')){
+        const apiBackup = state.api.key;
+        Object.assign(state, d);
+        state.api.key = apiBackup;
+        save();
+        toast('インポート完了',false);
+        location.reload();
+      }
+    }catch(err){ toast('インポート失敗: '+err.message,true); }
+  };
+  r.readAsText(f);
+}
+function resetAll(){
+  if(!confirm('全データを削除します。元に戻せません。よろしいですか？')) return;
+  if(!confirm('本当によろしいですか？')) return;
+  localStorage.removeItem(STORE_KEY);
+  location.reload();
+}
+
+// ====== Helpers ======
+function escapeHtml(s){
+  if(s==null) return '';
+  return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s){
+  if(s==null) return '';
+  return String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;').replace(/\n/g,' ');
+}
+function romanize(n){
+  return ['i','ii','iii','iv','v','vi','vii','viii'][n-1] || n;
+}
+function toast(msg, isError){
+  const t = document.createElement('div');
+  t.className = 'toast' + (isError?' error':'');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 3500);
+}
+
+// ====== Init ======
+load();
+// Ensure kpi field exists for older saved states
+if(!state.kpi) state.kpi = { url:'', lastFetched:null, rawData:'', parsed:null, autoInject:true };
+if(!state.strategy) state.strategy = {
+  coreMessage: '判断に疲れている人のために、代わりに考え続けている工場。創業57年の加工の上手さではなく、判断の上手さを証明するメディアにする。',
+  keyThemes: '【発注者向け・刺さるテーマ】「この図面、危ないです（先に止める）」／「納期が無理なときの最適解」／「品質が荒れる原因は加工じゃなく段取り」／「価格交渉が起きる案件の共通点」／「トラブルを未然に潰す確認項目」 ／【長期検討者向け】"判断の辞書"を作る／「良い外注先の見分け方」／「発注側が言語化できない不安の代弁」',
+  triggerWords: '段取り／リスク／事前確認／仕様整理／現場が止まる／"後で困らない"／"事故らない"／"やり直しを防ぐ"／迷う／正解が分からない／比較できない／選べない／"判断基準"／"基準がない"',
+  cta: '「問い合わせ」ではなく「相談」導線に寄せる。例：図面なし壁打ち／段取り診断／仕様整理相談。長期検討者には相談を取らない（保存・検索・再訪が勝ち）。',
+  decisionFlow: '製造業の意思決定は「探す」より「思い出す」。営業トークの前に、相手の頭の中で"採点"を終わらせておくのが広報の役割。',
+  partnerThemes: '【協力企業向け・刺さるテーマ】"無理を前提にしない仕事設計"／依頼の出し方の型／品質・納期の合意形成のやり方／"協力会社を守る"。協力企業に効くのはバズでもPRでもなく「取引の体験価値」（依頼が明確・判断が早い・変更が少ない・支払いが堅い・トラブル時に逃げない・相談しやすい）。発信＝相手にとっての"仕事のしやすさ"を上げる情報提供にする。',
+  routeSalesPlay: '広報はルート営業の前段に置く。営業同行の代わりに「URLを同行させる」（ブログ／YouTube／判断まとめ資料／月次配信）。営業が説明しないほど格が上がる。広報テーマは「図面を止めた話」「無理な納期を断った話」「仕様整理を代行した話」「協力会社を守った話」など、売上に直結しない"判断の話"。これが信頼に変わる。',
+  customerAsAdvocate: '既存顧客が「藤電設はこういう判断基準がある」「だから安心して任せてる」「止めてくれる会社」と勝手に言語化してくれる状態を作る。既存顧客向けコンテンツ（月1推奨）は外向けSNSとは別ライン（メール／LINE公式／A4 1枚PDF）で「今月の判断」「今月の注意点」を配信。これを整えると新規顧客・採用・協力企業すべてに波及する中心コンテンツになる。SNS発信もこの「既存顧客が説明できる材料」を意識して組む。'
+};
+renderBrand();
+renderSettings();
+setApiStatus(!!state.api.key && false); // false initially, will be confirmed when used
+if(state.api.key) setApiStatus(true);
+// KPI status indicator
+if(state.kpi.lastError) setKpiStatus('error');
+else if(state.kpi.lastFetched) setKpiStatus('ok');
+else setKpiStatus('off');
+refreshUI();
+</script>
+
+</body>
+</html>

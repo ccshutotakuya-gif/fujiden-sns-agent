@@ -1,0 +1,10 @@
+{
+  "name": "cc-sns-hub",
+  "private": true,
+  "description": "Cc SNS Hub — 7 社の SNS 数値管理と月次レポート自動化（Google Apps Script）",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "push": "clasp push",
+    "deploy": "clasp deploy"
+  }
+}

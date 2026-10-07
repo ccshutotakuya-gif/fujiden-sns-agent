@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<base target="_top">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cc SNS Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#F5F6F8;--panel:#FFFFFF;--panel-2:#F0F2F5;--line:#E2E5EA;--ink:#1C2430;--ink-2:#5B6574;--ink-3:#8A93A0;
+    --accent:#2754C5;--accent-2:#E8EEFB;--good:#1E8E5A;--bad:#C2410C;--warn:#B7791F;
+    --ig:#C13584;--yt:#E02424;--x:#111827;--tt:#00A3B4;
+    --radius:10px;--shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0F141B;--panel:#161D26;--panel-2:#1C2531;--line:#2A3442;--ink:#E7ECF2;--ink-2:#A7B1BE;--ink-3:#7A8594;
+      --accent:#6E95F5;--accent-2:#1D2A44;--good:#3DBE82;--bad:#F07B4A;--warn:#E3B04B;--x:#E7ECF2;
+      --shadow:none;
+    }
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:'Noto Sans JP',system-ui,sans-serif;font-size:14px;line-height:1.6}
+  button,input,select,textarea{font:inherit;color:inherit}
+  a{color:var(--accent)}
+  .hidden{display:none!important}
+
+  /* login */
+  .login{min-height:100vh;display:grid;place-items:center;padding:16px}
+  .login-card{width:100%;max-width:380px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:32px;box-shadow:var(--shadow)}
+  .login-card h1{font-size:20px;margin-bottom:4px}
+  .login-card p{color:var(--ink-2);font-size:13px;margin-bottom:20px}
+
+  /* layout */
+  header{position:sticky;top:0;z-index:10;background:var(--panel);border-bottom:1px solid var(--line)}
+  .bar{max-width:1200px;margin:auto;display:flex;align-items:center;gap:12px;padding:12px 16px;flex-wrap:wrap}
+  .logo{font-weight:700;font-size:16px;cursor:pointer}
+  .logo span{color:var(--accent)}
+  .spacer{flex:1}
+  main{max-width:1200px;margin:auto;padding:20px 16px 60px}
+
+  .btn{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:7px 14px;cursor:pointer;white-space:nowrap}
+  .btn:hover{border-color:var(--ink-3)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.small{padding:4px 10px;font-size:12px}
+  .btn.danger{color:var(--bad)}
+  .btn:disabled{opacity:.5;cursor:wait}
+  input,select,textarea{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+  textarea{min-height:90px;resize:vertical}
+  label{display:block;font-size:12px;color:var(--ink-2);margin:10px 0 4px}
+  .row{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);margin-bottom:16px}
+  .panel h2{font-size:15px;margin-bottom:12px}
+  .muted{color:var(--ink-2)}
+  .small{font-size:12px}
+
+  .tiles{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin-bottom:16px}
+  .tile{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow)}
+  .tile .k{font-size:12px;color:var(--ink-2)}
+  .tile .v{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
+  .tile .d{font-size:12px}
+  .up{color:var(--good)}.down{color:var(--bad)}
+
+  .cards{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;cursor:pointer;box-shadow:var(--shadow);transition:border-color .15s}
+  .card:hover{border-color:var(--accent)}
+  .card h3{font-size:15px;margin-bottom:2px}
+  .plats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}
+  .plat{background:var(--panel-2);border-radius:8px;padding:6px 8px}
+  .plat .n{font-weight:700;font-variant-numeric:tabular-nums}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+  .dot.instagram{background:var(--ig)}.dot.youtube{background:var(--yt)}.dot.x{background:var(--x)}.dot.tiktok{background:var(--tt)}
+
+  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:16px;overflow-x:auto}
+  .tab{padding:8px 14px;border:none;background:none;cursor:pointer;color:var(--ink-2);border-bottom:2px solid transparent;white-space:nowrap}
+  .tab.active{color:var(--ink);border-bottom-color:var(--accent);font-weight:500}
+
+  .tbl-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--ink-2);font-weight:500;background:var(--panel-2)}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+  .md{line-height:1.8}
+  .md h1{font-size:20px;margin:6px 0 12px}
+  .md h2{font-size:16px;margin:22px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+  .md h3{font-size:14px;margin:14px 0 6px}
+  .md p,.md ul,.md ol{margin:6px 0}
+  .md ul,.md ol{padding-left:22px}
+  .md table{margin:8px 0}
+  .md blockquote{color:var(--ink-2);border-left:3px solid var(--line);padding-left:10px}
+
+  .badge{display:inline-block;font-size:11px;padding:1px 8px;border-radius:999px;background:var(--accent-2);color:var(--accent)}
+  .badge.ok{background:rgba(30,142,90,.12);color:var(--good)}
+  .badge.ng{background:rgba(194,65,12,.12);color:var(--bad)}
+
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:8px;z-index:100;max-width:90vw}
+  .toast.err{background:var(--bad);color:#fff}
+  .overlay{position:fixed;inset:0;background:rgba(15,20,27,.35);display:grid;place-items:center;z-index:90}
+  .overlay .box{background:var(--panel);padding:20px 26px;border-radius:12px;border:1px solid var(--line);text-align:center}
+  .spin{width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:s 1s linear infinite;margin:0 auto 10px}
+  @keyframes s{to{transform:rotate(360deg)}}
+  .secret{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:8px 14px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+  .secret-in{display:flex;gap:8px}
+  .secret-name .badge{margin-left:4px}
+  .chart-box{position:relative;height:260px}
+  @media (max-width:600px){ .secret{grid-template-columns:1fr} .plats{grid-template-columns:repeat(2,1fr)} .tile .v{font-size:20px} }
+</style>
+</head>
+<body>
+
+<!-- ログイン -->
+<section id="loginView" class="login">
+  <div class="login-card">
+    <h1>Cc SNS Hub</h1>
+    <p>Cc 社内専用です。共通パスワードを入力してください。</p>
+    <form id="loginForm">
+      <input type="password" id="pass" placeholder="パスワード" autocomplete="current-password" required>
+      <button class="btn primary" style="width:100%;margin-top:12px" type="submit">ログイン</button>
+      <p id="loginErr" class="small" style="color:var(--bad);margin:10px 0 0"></p>
+    </form>
+  </div>
+</section>
+
+<!-- アプリ -->
+<div id="appView" class="hidden">
+  <header>
+    <div class="bar">
+      <div class="logo" onclick="go('dashboard')">Cc <span>SNS Hub</span></div>
+      <div class="spacer"></div>
+      <input type="month" id="monthSel" style="width:auto">
+      <button class="btn" onclick="collectAll()">全社データ取得</button>
+      <button class="btn" onclick="go('settings')">設定</button>
+      <button class="btn" onclick="logout()">ログアウト</button>
+    </div>
+  </header>
+  <main id="main"></main>
+</div>
+
+<div id="overlay" class="overlay hidden"><div class="box"><div class="spin"></div><div id="overlayMsg">処理中…</div></div></div>
+
+<script>
+/* ================= 基本 ================= */
+var PL = ['instagram','youtube','x','tiktok'];
+var PL_LABEL = {instagram:'Instagram',youtube:'YouTube',x:'X',tiktok:'TikTok'};
+var S = { token:null, boot:null, view:'dashboard', clientId:null, detail:null, tab:'overview', chart:null };
+
+function store(k, v){ try{ if(v===undefined) return sessionStorage.getItem(k); if(v===null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); }catch(e){ return null; } }
+
+/** google.script.run を Promise 化（トークン自動付与・セッション切れ処理） */
+function api(fn){
+  var args = Array.prototype.slice.call(arguments, 1);
+  return new Promise(function(resolve, reject){
+    var r = google.script.run.withSuccessHandler(resolve).withFailureHandler(function(e){
+      var msg = (e && e.message) || String(e);
+      if(msg.indexOf('SESSION_EXPIRED') >= 0){ showLogin('セッションの有効期限が切れました。再ログインしてください。'); }
+      reject(new Error(msg));
+    });
+    r[fn].apply(r, fn === 'apiLogin' ? args : [S.token].concat(args));
+  });
+}
+
+function busy(msg){ document.getElementById('overlayMsg').textContent = msg || '処理中…'; document.getElementById('overlay').classList.remove('hidden'); }
+function idle(){ document.getElementById('overlay').classList.add('hidden'); }
+function toast(msg, err){
+  var t = document.createElement('div'); t.className = 'toast' + (err ? ' err' : ''); t.textContent = msg;
+  document.body.appendChild(t); setTimeout(function(){ t.remove(); }, err ? 6000 : 3000);
+}
+function fail(e){ idle(); if(String(e.message).indexOf('SESSION_EXPIRED') < 0) toast(e.message, true); }
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function safeUrl(u){ return /^https?:\/\//i.test(String(u || '')) ? String(u) : ''; }
+function fmt(n){ return n == null || n === '' ? '—' : Number(n).toLocaleString('ja-JP'); }
+function delta(v, unit){
+  if(v == null) return '<span class="muted">—</span>';
+  var cls = v > 0 ? 'up' : v < 0 ? 'down' : 'muted';
+  return '<span class="'+cls+'">' + (v > 0 ? '+' : '') + Number(v).toLocaleString('ja-JP') + (unit || '') + '</span>';
+}
+function month(){ return document.getElementById('monthSel').value; }
+function monthJa(m){ return m ? m.slice(0,4) + '年' + Number(m.slice(5,7)) + '月' : ''; }
+
+/* ================= 認証 ================= */
+function showLogin(msg){
+  S.token = null; store('cc_token', null);
+  document.getElementById('appView').classList.add('hidden');
+  document.getElementById('loginView').classList.remove('hidden');
+  document.getElementById('loginErr').textContent = msg || '';
+  idle();
+}
+document.getElementById('loginForm').addEventListener('submit', function(ev){
+  ev.preventDefault();
+  var p = document.getElementById('pass');
+  busy('ログイン中…');
+  api('apiLogin', p.value).then(function(r){
+    p.value = ''; S.token = r.token; store('cc_token', r.token); start();
+  }).catch(function(e){ idle(); document.getElementById('loginErr').textContent = e.message; });
+});
+function logout(){ api('apiLogout').catch(function(){}).then(function(){ showLogin(''); }); }
+
+function start(){
+  document.getElementById('loginView').classList.add('hidden');
+  document.getElementById('appView').classList.remove('hidden');
+  var ms = document.getElementById('monthSel');
+  if(!ms.value){ var d = new Date(); ms.value = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'); }
+  refresh();
+}
+document.getElementById('monthSel').addEventListener('change', function(){ S.view === 'client' ? openClient(S.clientId) : refresh(); });
+
+function refresh(){
+  busy('読み込み中…');
+  return api('apiBootstrap').then(function(b){ S.boot = b; idle(); render(); }).catch(fail);
+}
+function go(view){ S.view = view; if(view === 'dashboard') refresh(); else render(); window.scrollTo(0,0); }
+function render(){
+  var m = document.getElementById('main');
+  if(S.view === 'dashboard') m.innerHTML = viewDashboard();
+  else if(S.view === 'client') { m.innerHTML = viewClient(); afterClient(); }
+  else if(S.view === 'settings') m.innerHTML = viewSettings();
+  else if(S.view === 'editClient') m.innerHTML = viewEditClient();
+}
+
+/* ================= ダッシュボード ================= */
+function viewDashboard(){
+  var b = S.boot, cs = b.clients;
+  var tot = cs.reduce(function(a, c){
+    a.f += c.summary.followersEnd; a.g += c.summary.followerGrowth; a.v += c.summary.views; a.p += c.summary.postsPublished; return a;
+  }, {f:0,g:0,v:0,p:0});
+  var jobs = b.jobs || {};
+  var jobMsg = Object.keys(jobs).map(function(k){ return (k === 'collect' ? 'データ取得' : '月次レポート') + '：残り ' + jobs[k].remaining + ' 社をバックグラウンドで処理中'; }).join(' / ');
+  var h = '';
+  if(jobMsg) h += '<div class="panel small">' + esc(jobMsg) + '（数分後に再読み込みしてください）</div>';
+  h += '<div class="tiles">' +
+    tile('運用クライアント', cs.filter(function(c){ return c.client.active; }).length + ' 社', '') +
+    tile('合計フォロワー', fmt(tot.f), '今月 ' + delta(tot.g)) +
+    tile('今月の再生・表示', fmt(tot.v), monthJa(b.month)) +
+    tile('今月の投稿数', fmt(tot.p), '4 媒体合計') + '</div>';
+  h += '<div class="bar" style="padding:0 0 12px"><h2 style="font-size:16px">クライアント</h2><div class="spacer"></div>' +
+       '<button class="btn primary" onclick="editClient()">＋ クライアント追加</button></div>';
+  if(!cs.length) h += '<div class="panel muted">まだクライアントが登録されていません。「＋ クライアント追加」から 7 社を登録してください。</div>';
+  h += '<div class="cards">' + cs.map(function(c){
+    var cl = c.client;
+    return '<div class="card" onclick="openClient(\'' + esc(cl.id) + '\')">' +
+      '<div style="display:flex;justify-content:space-between;gap:8px"><div><h3>' + esc(cl.name) + '</h3><div class="small muted">' + esc(cl.industry || '') + '</div></div>' +
+      (cl.active ? '' : '<span class="badge ng">停止中</span>') + '</div>' +
+      '<div class="plats">' + PL.map(function(p){
+        var d = c.platforms[p];
+        return '<div class="plat"><div class="small muted"><span class="dot ' + p + '"></span>' + PL_LABEL[p] + '</div>' +
+          '<div class="n">' + (d ? fmt(d.followersEnd) : '—') + '</div><div class="small">' + (d ? delta(d.followerGrowth) : '') + '</div></div>';
+      }).join('') + '</div>' +
+      '<div class="small muted" style="margin-top:10px">最終取得: ' + esc(c.lastFetchedAt ? c.lastFetchedAt.replace('T',' ').slice(0,16) : '未取得') + '</div>' +
+    '</div>';
+  }).join('') + '</div>';
+  return h;
+}
+function tile(k, v, d){ return '<div class="tile"><div class="k">' + k + '</div><div class="v">' + v + '</div><div class="d muted">' + d + '</div></div>'; }
+
+function collectAll(){
+  if(!confirm('全クライアントの 4 媒体データを今すぐ取得しますか？（毎朝 6 時にも自動取得されます）')) return;
+  busy('全社のデータを取得中…（数分かかることがあります）');
+  api('apiCollectAll').then(function(){ idle(); toast('取得しました'); refresh(); }).catch(fail);
+}
+
+/* ================= クライアント詳細 ================= */
+function openClient(id){
+  S.view = 'client'; S.clientId = id;
+  busy('読み込み中…');
+  api('apiClientDetail', id, month()).then(function(d){ S.detail = d; idle(); render(); }).catch(fail);
+}
+
+function viewClient(){
+  var d = S.detail, c = d.client, mo = d.monthly;
+  var tabs = [['overview','概要'],['posts','投稿'],['report','月次レポート'],['ask','AI に質問'],['manual','手入力'],['info','基本情報・連携']];
+  var h = '<div class="bar" style="padding:0 0 8px"><button class="btn small" onclick="go(\'dashboard\')">← 一覧</button>' +
+    '<h2 style="font-size:18px">' + esc(c.name) + '</h2><span class="muted small">' + esc(c.industry || '') + '</span><div class="spacer"></div>' +
+    '<button class="btn" onclick="collectOne()">この会社のデータ取得</button></div>';
+  h += '<div class="tabs">' + tabs.map(function(t){ return '<button class="tab' + (S.tab === t[0] ? ' active' : '') + '" onclick="S.tab=\'' + t[0] + '\';render()">' + t[1] + '</button>'; }).join('') + '</div>';
+
+  if(S.tab === 'overview'){
+    h += '<div class="tiles">' + tile('合計フォロワー', fmt(mo.summary.followersEnd), monthJa(mo.month) + ' ' + delta(mo.summary.followerGrowth)) +
+      tile('再生・表示', fmt(mo.summary.views), '') + tile('投稿数', fmt(mo.summary.postsPublished), '') + '</div>';
+    h += '<div class="panel"><h2>媒体別（' + monthJa(mo.month) + '）</h2><div class="tbl-wrap"><table><tr><th>媒体</th><th class="num">フォロワー</th><th class="num">増減</th><th class="num">前月比</th><th class="num">再生・表示</th><th class="num">前月比</th><th class="num">投稿数</th><th class="num">ER</th></tr>' +
+      PL.map(function(p){
+        var x = mo.platforms[p];
+        if(!x) return '<tr><td><span class="dot ' + p + '"></span>' + PL_LABEL[p] + '</td><td colspan="7" class="muted">データなし</td></tr>';
+        var ch = x.change || {};
+        return '<tr><td><span class="dot ' + p + '"></span>' + PL_LABEL[p] + '</td><td class="num">' + fmt(x.followersEnd) + '</td><td class="num">' + delta(x.followerGrowth) +
+          '</td><td class="num">' + delta(ch.followers, '%') + '</td><td class="num">' + fmt(x.views) + '</td><td class="num">' + delta(ch.views, '%') +
+          '</td><td class="num">' + fmt(x.postsPublished) + '</td><td class="num">' + (x.engagementRate == null ? '—' : x.engagementRate + '%') + '</td></tr>';
+      }).join('') + '</table></div><p class="small muted" style="margin-top:8px">ER = (いいね+コメント+シェア+保存) ÷ 当月投稿の再生数</p></div>';
+    h += '<div class="panel"><h2>フォロワー推移（直近 120 日）</h2><div class="chart-box"><canvas id="chart"></canvas></div></div>';
+  }
+
+  if(S.tab === 'posts'){
+    h += '<div class="panel"><h2>直近の投稿</h2><div class="tbl-wrap"><table><tr><th>日付</th><th>媒体</th><th>内容</th><th class="num">再生</th><th class="num">いいね</th><th class="num">コメント</th><th class="num">シェア</th><th class="num">保存</th></tr>' +
+      d.recentPosts.map(function(p){
+        return '<tr><td class="small">' + esc(String(p.publishedAt).slice(0,10)) + '</td><td><span class="dot ' + esc(p.platform) + '"></span>' + PL_LABEL[p.platform] + '</td><td>' +
+          (safeUrl(p.url) ? '<a href="' + esc(safeUrl(p.url)) + '" target="_blank" rel="noopener">' + esc(p.title || '(無題)') + '</a>' : esc(p.title)) + '</td><td class="num">' + fmt(p.views) +
+          '</td><td class="num">' + fmt(p.likes) + '</td><td class="num">' + fmt(p.comments) + '</td><td class="num">' + fmt(p.shares) + '</td><td class="num">' + fmt(p.saves) + '</td></tr>';
+      }).join('') + '</table></div>' + (d.recentPosts.length ? '' : '<p class="muted">投稿データがありません</p>') + '</div>';
+  }
+
+  if(S.tab === 'report'){
+    var eng = S.boot.settings.defaultEngine;
+    h += '<div class="panel"><h2>' + monthJa(mo.month) + ' の月次レポートを作成</h2>' +
+      '<p class="small muted">設定画面の「固定指示」に沿って、ボタン 1 つでクライアント提出用レポートを作成し、Google ドキュメントに保存します。</p>' +
+      '<div class="row" style="align-items:end"><div><label>AI エンジン</label><select id="engine">' + engineOptions(eng) + '</select></div>' +
+      '<div><button class="btn primary" onclick="genReport()">レポートを作成</button></div></div></div>';
+    h += d.reports.map(function(r, i){
+      return '<div class="panel"><div class="bar" style="padding:0 0 8px"><b>' + monthJa(r.month) + '</b><span class="badge">' + esc(r.engine) + '</span><span class="small muted">' + esc(String(r.createdAt).replace('T',' ').slice(0,16)) + '</span><div class="spacer"></div>' +
+        (safeUrl(r.docUrl) ? '<a class="btn small" href="' + esc(r.docUrl) + '" target="_blank" rel="noopener">Google ドキュメントで開く</a>' : '') +
+        '<button class="btn small" onclick="copyReport(' + i + ')">本文をコピー</button>' +
+        '<button class="btn small" onclick="toggleReport(' + i + ')">表示/非表示</button></div>' +
+        '<div id="rep' + i + '" class="md' + (i ? ' hidden' : '') + '">' + md(r.markdown) + '</div></div>';
+    }).join('');
+  }
+
+  if(S.tab === 'ask'){
+    h += '<div class="panel"><h2>このクライアントについて AI に質問</h2>' +
+      '<p class="small muted">' + monthJa(mo.month) + ' のデータをもとに回答します。例：「来月の投稿テーマ案を 5 つ」「YouTube が伸び悩んでいる理由は？」</p>' +
+      '<textarea id="q" placeholder="質問を入力"></textarea>' +
+      '<div class="row" style="align-items:end;margin-top:8px"><div><label>AI</label><select id="askEngine"><option value="claude">Claude</option><option value="gpt">ChatGPT</option></select></div>' +
+      '<div><button class="btn primary" onclick="ask()">質問する</button></div></div><div id="answer" class="md" style="margin-top:14px"></div></div>';
+  }
+
+  if(S.tab === 'manual'){
+    h += '<div class="panel"><h2>アカウント数値の手入力</h2><p class="small muted">API 未連携の媒体（例：X を API 契約しない場合）は、月末などに数字を入力してください。空欄は保存されません。</p>' +
+      '<div class="row"><div><label>媒体</label><select id="mPlat">' + PL.map(function(p){ return '<option value="' + p + '">' + PL_LABEL[p] + '</option>'; }).join('') + '</select></div>' +
+      '<div><label>日付</label><input type="date" id="mDate" value="' + new Date().toISOString().slice(0,10) + '"></div>' +
+      '<div><label>フォロワー数</label><input type="number" id="mFollowers"></div><div><label>累計投稿数</label><input type="number" id="mPosts"></div>' +
+      '<div><label>その日の表示回数/再生数</label><input type="number" id="mViews"></div><div><label>その日のリーチ</label><input type="number" id="mReach"></div></div>' +
+      '<button class="btn primary" style="margin-top:12px" onclick="saveManual()">保存</button></div>';
+    h += '<div class="panel"><h2>投稿の手入力</h2><div class="row">' +
+      '<div><label>媒体</label><select id="pPlat">' + PL.map(function(p){ return '<option value="' + p + '">' + PL_LABEL[p] + '</option>'; }).join('') + '</select></div>' +
+      '<div><label>投稿日</label><input type="date" id="pDate"></div><div><label>内容（タイトル）</label><input id="pTitle"></div><div><label>URL</label><input id="pUrl"></div>' +
+      '<div><label>再生/表示</label><input type="number" id="pViews"></div><div><label>いいね</label><input type="number" id="pLikes"></div>' +
+      '<div><label>コメント</label><input type="number" id="pComments"></div><div><label>シェア/リポスト</label><input type="number" id="pShares"></div><div><label>保存</label><input type="number" id="pSaves"></div></div>' +
+      '<button class="btn primary" style="margin-top:12px" onclick="saveManualPost()">保存</button></div>';
+  }
+
+  if(S.tab === 'info'){
+    h += '<div class="panel"><h2>基本情報</h2><table>' +
+      [['目的', c.goal],['KPI', c.kpi],['レポートのトーン', c.tone],['補足', c.notes],['Instagram ID', c.ig_user_id],['YouTube', c.yt_channel_id],['X', c.x_username ? '@' + c.x_username : ''],['TikTok', d.tiktokLinked ? '連携済み' : '未連携']]
+      .map(function(r){ return '<tr><th style="width:160px">' + r[0] + '</th><td>' + esc(r[1] || '—') + '</td></tr>'; }).join('') + '</table>' +
+      '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><button class="btn" onclick="editClient(S.detail.client)">編集</button>' +
+      '<button class="btn" onclick="linkTikTok()">' + (d.tiktokLinked ? 'TikTok を再連携' : 'TikTok を連携') + '</button>' +
+      '<button class="btn danger" onclick="delClient()">削除</button></div></div>';
+  }
+  return h;
+}
+
+function afterClient(){
+  if(S.tab !== 'overview' || !window.Chart) return;
+  var el = document.getElementById('chart'); if(!el) return;
+  if(S.chart){ S.chart.destroy(); S.chart = null; }
+  var css = getComputedStyle(document.documentElement);
+  var col = {instagram:css.getPropertyValue('--ig'), youtube:css.getPropertyValue('--yt'), x:css.getPropertyValue('--x'), tiktok:css.getPropertyValue('--tt')};
+  var series = S.detail.series;
+  var ds = PL.filter(function(p){ return series[p]; }).map(function(p){
+    return { label: PL_LABEL[p], data: series[p].map(function(r){ return {x: r.date, y: r.followers}; }), borderColor: col[p].trim(), backgroundColor: col[p].trim(), tension:.25, pointRadius:0, borderWidth:2 };
+  });
+  S.chart = new Chart(el, { type:'line', data:{datasets:ds}, options:{ maintainAspectRatio:false, parsing:true,
+    scales:{ x:{type:'category', labels: uniqueDates(series), ticks:{maxTicksLimit:8, color:css.getPropertyValue('--ink-2')}, grid:{display:false}},
+             y:{ticks:{color:css.getPropertyValue('--ink-2')}, grid:{color:css.getPropertyValue('--line')}} },
+    plugins:{ legend:{labels:{color:css.getPropertyValue('--ink-2'), boxWidth:10}} }, interaction:{mode:'index', intersect:false} } });
+}
+function uniqueDates(series){ var s = {}; Object.keys(series).forEach(function(p){ series[p].forEach(function(r){ s[r.date] = 1; }); }); return Object.keys(s).sort(); }
+
+function engineOptions(sel){
+  return [['claude+gpt','Claude + ChatGPT（ChatGPT が分析 → Claude が清書）'],['claude','Claude のみ'],['gpt','ChatGPT のみ']]
+    .map(function(o){ return '<option value="' + o[0] + '"' + (o[0] === sel ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('');
+}
+
+function collectOne(){
+  busy('データ取得中…');
+  api('apiCollect', S.clientId).then(function(r){
+    idle();
+    var msg = PL.map(function(p){ return PL_LABEL[p] + ': ' + (r[p] === 'ok' ? 'OK' : r[p] === 'skip' ? '未設定' : r[p]); }).join(' / ');
+    toast(msg, Object.keys(r).some(function(k){ return String(r[k]).indexOf('error') === 0; }));
+    openClient(S.clientId);
+  }).catch(fail);
+}
+function genReport(){
+  busy('AI がレポートを作成中…（1〜3 分）');
+  api('apiGenerateReport', S.clientId, month(), document.getElementById('engine').value)
+    .then(function(){ idle(); toast('レポートを作成しました'); openClient(S.clientId); }).catch(fail);
+}
+function toggleReport(i){ document.getElementById('rep' + i).classList.toggle('hidden'); }
+function copyReport(i){
+  var t = S.detail.reports[i].markdown;
+  (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){ toast('コピーしました'); })
+    .catch(function(){ toast('コピーできませんでした。Google ドキュメントからコピーしてください', true); });
+}
+function ask(){
+  var q = document.getElementById('q').value.trim(); if(!q) return;
+  busy('AI が回答中…');
+  api('apiAsk', S.clientId, month(), q, document.getElementById('askEngine').value)
+    .then(function(a){ idle(); document.getElementById('answer').innerHTML = md(a); }).catch(fail);
+}
+function val(id){ var e = document.getElementById(id); return e ? e.value : ''; }
+function saveManual(){
+  api('apiManualSnapshot', { clientId:S.clientId, platform:val('mPlat'), date:val('mDate'), followers:val('mFollowers'), posts:val('mPosts'), views:val('mViews'), reach:val('mReach') })
+    .then(function(){ toast('保存しました'); openClient(S.clientId); }).catch(fail);
+}
+function saveManualPost(){
+  if(!val('pDate')) return toast('投稿日を入力してください', true);
+  api('apiManualPost', { clientId:S.clientId, platform:val('pPlat'), publishedAt:val('pDate') + 'T12:00:00+09:00', title:val('pTitle'), url:val('pUrl'),
+    views:val('pViews'), likes:val('pLikes'), comments:val('pComments'), shares:val('pShares'), saves:val('pSaves') })
+    .then(function(){ toast('保存しました'); openClient(S.clientId); }).catch(fail);
+}
+function linkTikTok(){
+  api('apiTikTokAuthUrl', S.clientId).then(function(url){
+    window.open(url, '_blank', 'noopener');
+    toast('別タブで TikTok にログインし、許可してください（クライアント本人のアカウントで）');
+  }).catch(fail);
+}
+function delClient(){
+  if(!confirm(S.detail.client.name + ' を削除しますか？（取得済みデータはスプレッドシートに残ります）')) return;
+  api('apiDeleteClient', S.clientId).then(function(){ toast('削除しました'); go('dashboard'); }).catch(fail);
+}
+
+/* ================= クライアント編集 ================= */
+var EDIT = null;
+function editClient(c){ EDIT = c || { active:true }; S.view = 'editClient'; render(); }
+function viewEditClient(){
+  var c = EDIT;
+  function f(id, label, ph, type){ return '<div><label>' + label + '</label><input id="f_' + id + '" type="' + (type || 'text') + '" value="' + esc(c[id] || '') + '" placeholder="' + esc(ph || '') + '"></div>'; }
+  function t(id, label, ph){ return '<div><label>' + label + '</label><textarea id="f_' + id + '" placeholder="' + esc(ph || '') + '">' + esc(c[id] || '') + '</textarea></div>'; }
+  return '<div class="bar" style="padding:0 0 12px"><button class="btn small" onclick="' + (c.id ? 'openClient(\'' + esc(c.id) + '\')' : 'go(\'dashboard\')') + '">← 戻る</button><h2 style="font-size:18px">' + (c.id ? 'クライアント編集' : 'クライアント追加') + '</h2></div>' +
+    '<div class="panel"><h2>基本情報（レポートの品質に直結します）</h2><div class="row">' + f('name','会社名 *','株式会社〇〇') + f('industry','業種','金属加工 / 電気設備 など') + '</div>' +
+    t('goal','SNS 運用の目的','例：採用応募を増やす（特に 20 代の技術職）、指名検索を増やす') +
+    t('kpi','KPI（目標数値）','例：Instagram フォロワー 月 +150、YouTube 月間再生 2 万回、採用ページ遷移 月 50 件') +
+    '<div class="row">' + f('tone','レポートのトーン','丁寧・前向き・数字重視 など') + '<div><label>状態</label><select id="f_active"><option value="true"' + (c.active ? ' selected' : '') + '>運用中</option><option value="false"' + (c.active ? '' : ' selected') + '>停止中</option></select></div></div>' +
+    t('notes','補足（担当者名・NG 事項・今月のトピックなど）','') + '</div>' +
+    '<div class="panel"><h2>アカウント連携</h2><div class="row">' +
+    f('ig_user_id','Instagram ビジネスアカウント ID','17841400000000000') +
+    f('yt_channel_id','YouTube チャンネル ID または @ハンドル','UCxxxx… / @example') +
+    f('x_username','X ユーザー名','@example') + '</div>' +
+    '<p class="small muted" style="margin-top:8px">TikTok は保存後、「基本情報・連携」タブの「TikTok を連携」から接続します。</p></div>' +
+    '<button class="btn primary" onclick="saveClient()">保存</button>';
+}
+function saveClient(){
+  var keys = ['name','industry','goal','kpi','tone','notes','ig_user_id','yt_channel_id','x_username'];
+  var o = { id: EDIT.id };
+  keys.forEach(function(k){ o[k] = val('f_' + k).trim(); });
+  o.active = val('f_active') === 'true';
+  if(!o.name) return toast('会社名を入力してください', true);
+  busy('保存中…');
+  api('apiSaveClient', o).then(function(c){ idle(); toast('保存しました'); S.tab = 'overview'; openClient(c.id); }).catch(fail);
+}
+
+/* ================= 設定 ================= */
+var SECRET_LABELS = {
+  ANTHROPIC_API_KEY:'Claude（Anthropic）API キー', OPENAI_API_KEY:'ChatGPT（OpenAI）API キー',
+  META_ACCESS_TOKEN:'Meta（Instagram）アクセストークン', YOUTUBE_API_KEY:'YouTube Data API キー',
+  X_BEARER_TOKEN:'X API Bearer Token（任意・従量課金）', TIKTOK_CLIENT_KEY:'TikTok Client Key', TIKTOK_CLIENT_SECRET:'TikTok Client Secret'
+};
+function viewSettings(){
+  var s = S.boot.settings;
+  var h = '<div class="bar" style="padding:0 0 12px"><button class="btn small" onclick="go(\'dashboard\')">← 一覧</button><h2 style="font-size:18px">設定</h2></div>';
+  h += '<div class="panel"><h2>レポート設定</h2><div class="row">' +
+    '<div><label>報告元（会社名）</label><input id="s_agencyName" value="' + esc(s.agencyName) + '"></div>' +
+    '<div><label>既定の AI エンジン</label><select id="s_defaultEngine">' + engineOptions(s.defaultEngine) + '</select></div>' +
+    '<div><label>Claude モデル</label><input id="s_claudeModel" value="' + esc(s.claudeModel) + '"></div>' +
+    '<div><label>ChatGPT モデル</label><input id="s_openaiModel" value="' + esc(s.openaiModel) + '"></div>' +
+    '<div><label>月初の自動レポート作成</label><select id="s_autoMonthlyReport"><option value="true"' + (s.autoMonthlyReport ? ' selected' : '') + '>オン（毎月 1 日 8 時に前月分を全社作成）</option><option value="false"' + (s.autoMonthlyReport ? '' : ' selected') + '>オフ</option></select></div>' +
+    '<div><label>完了通知メール</label><input id="s_notifyEmail" type="email" value="' + esc(s.notifyEmail) + '" placeholder="sns@example.com"></div></div>' +
+    '<label>固定指示（すべてのクライアントの月次レポートはこの指示で作成されます）</label><textarea id="s_reportInstruction" style="min-height:320px;font-size:13px">' + esc(s.reportInstruction) + '</textarea>' +
+    '<div style="display:flex;gap:8px;margin-top:12px"><button class="btn primary" onclick="saveSettings()">保存</button><button class="btn" onclick="resetInstruction()">指示を初期値に戻す</button></div></div>';
+  h += '<div class="panel"><h2>API キー・連携</h2><p class="small muted">キーはサーバー側（Script Properties）にのみ保存され、画面には表示されません。空欄で保存すると削除します。</p>' +
+    Object.keys(SECRET_LABELS).map(function(k){
+      return '<div class="secret"><div class="secret-name">' + SECRET_LABELS[k] + ' ' + (s.keys[k] ? '<span class="badge ok">登録済み</span>' : '<span class="badge ng">未登録</span>') +
+        '</div><div class="secret-in"><input type="password" id="k_' + k + '" placeholder="新しい値を入力" autocomplete="off"><button class="btn small" onclick="saveSecret(\'' + k + '\')">保存</button></div></div>';
+    }).join('') +
+    '<p class="small muted" style="margin-top:10px">TikTok アプリのリダイレクト URI に登録する URL：<br><code style="word-break:break-all">' + esc(s.redirectUri) + '</code></p>' +
+    '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button class="btn" onclick="testAi(\'claude\')">Claude 接続テスト</button><button class="btn" onclick="testAi(\'gpt\')">ChatGPT 接続テスト</button><button class="btn" onclick="showLogs()">エラーログ</button></div><div id="logs"></div></div>';
+  h += '<div class="panel"><h2>共通パスワードの変更</h2><p class="small muted">変更すると全員がログアウトされます。新しいパスワードを社内に共有してください。</p><div class="row">' +
+    '<div><label>現在のパスワード</label><input type="password" id="pw0"></div><div><label>新しいパスワード（8 文字以上）</label><input type="password" id="pw1"></div><div><label>新しいパスワード（確認）</label><input type="password" id="pw2"></div></div>' +
+    '<button class="btn" style="margin-top:12px" onclick="changePw()">変更</button></div>';
+  return h;
+}
+function saveSettings(patch){
+  patch = patch || { agencyName:val('s_agencyName'), defaultEngine:val('s_defaultEngine'), claudeModel:val('s_claudeModel'), openaiModel:val('s_openaiModel'),
+    autoMonthlyReport: val('s_autoMonthlyReport') === 'true', notifyEmail:val('s_notifyEmail'), reportInstruction:val('s_reportInstruction') };
+  busy('保存中…');
+  api('apiSaveSettings', patch).then(function(s){ idle(); S.boot.settings = s; toast('保存しました'); render(); }).catch(fail);
+}
+function resetInstruction(){ if(confirm('固定指示を初期値に戻しますか？')) saveSettings({ reportInstruction:'' }); }
+function saveSecret(k){
+  var v = val('k_' + k).trim();
+  if(!v && !confirm(SECRET_LABELS[k] + ' を削除しますか？')) return;
+  api('apiSaveSecret', k, v).then(function(s){ S.boot.settings = s; toast('保存しました'); render(); }).catch(fail);
+}
+function testAi(engine){
+  busy('接続テスト中…');
+  api('apiTestAi', engine).then(function(r){ idle(); toast('応答: ' + r.slice(0, 60)); }).catch(fail);
+}
+function showLogs(){
+  api('apiLogs').then(function(rows){
+    document.getElementById('logs').innerHTML = '<div class="tbl-wrap" style="margin-top:12px;max-height:320px;overflow:auto"><table>' +
+      rows.map(function(r){ return '<tr><td class="small">' + esc(String(r.at).replace('T',' ')) + '</td><td>' + esc(r.level) + '</td><td>' + esc(r.scope) + '</td><td>' + esc(r.message) + '</td></tr>'; }).join('') +
+      '</table></div>' + (rows.length ? '' : '<p class="muted small" style="margin-top:8px">ログはありません</p>');
+  }).catch(fail);
+}
+function changePw(){
+  if(val('pw1') !== val('pw2')) return toast('確認用パスワードが一致しません', true);
+  api('apiChangePassword', val('pw0'), val('pw1')).then(function(){ showLogin('パスワードを変更しました。新しいパスワードでログインしてください。'); }).catch(fail);
+}
+
+/* ================= Markdown（簡易） ================= */
+function inline(s){
+  return esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/(https?:\/\/[^\s<)]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+}
+function md(src){
+  var lines = String(src || '').replace(/\r/g, '').split('\n'), out = [], i = 0, list = null;
+  function closeList(){ if(list){ out.push('</' + list + '>'); list = null; } }
+  while(i < lines.length){
+    var l = lines[i], m;
+    if(/^\s*\|/.test(l)){
+      closeList();
+      var rows = [];
+      while(i < lines.length && /^\s*\|/.test(lines[i])){ if(!/^\s*\|[\s:\-|]+\|\s*$/.test(lines[i])) rows.push(lines[i].trim().replace(/^\||\|$/g, '').split('|')); i++; }
+      out.push('<div class="tbl-wrap"><table>' + rows.map(function(r, ri){ return '<tr>' + r.map(function(c){ return ri ? '<td>' + inline(c.trim()) + '</td>' : '<th>' + inline(c.trim()) + '</th>'; }).join('') + '</tr>'; }).join('') + '</table></div>');
+      continue;
+    }
+    if((m = /^(#{1,4})\s+(.*)$/.exec(l))){ closeList(); out.push('<h' + m[1].length + '>' + inline(m[2]) + '</h' + m[1].length + '>'); }
+    else if((m = /^\s*[-*]\s+(.*)$/.exec(l))){ if(list !== 'ul'){ closeList(); out.push('<ul>'); list = 'ul'; } out.push('<li>' + inline(m[1]) + '</li>'); }
+    else if((m = /^\s*\d+[.)]\s+(.*)$/.exec(l))){ if(list !== 'ol'){ closeList(); out.push('<ol>'); list = 'ol'; } out.push('<li>' + inline(m[1]) + '</li>'); }
+    else if((m = /^>\s?(.*)$/.exec(l))){ closeList(); out.push('<blockquote>' + inline(m[1]) + '</blockquote>'); }
+    else if(/^```/.test(l) || !l.trim()){ closeList(); }
+    else { closeList(); out.push('<p>' + inline(l) + '</p>'); }
+    i++;
+  }
+  closeList();
+  return out.join('');
+}
+
+/* ================= 起動 ================= */
+(function(){
+  var t = store('cc_token');
+  if(t){ S.token = t; start(); }
+})();
+</script>
+</body>
+</html>

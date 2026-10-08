@@ -73,6 +73,7 @@
       '## 8. 担当者からのひとこと\n現場の皆さまの協力のおかげで「人が見える発信」が定着してきました。来月はこの流れを採用につなげることに集中します。引き続きよろしくお願いいたします。\n\n> ※これはデモ用のサンプルです。実際のレポートは取得したデータと固定指示から AI が作成します。';
   }
   var reports = {};
+  var manualPA = {};
   var settings = { agencyName:'株式会社Cc', claudeModel:'claude-opus-5-5', openaiModel:'gpt-5', defaultEngine:'claude+gpt', autoMonthlyReport:true, notifyEmail:'',
     reportInstruction:'あなたは製造業クライアント専門の SNS 運用代理店のシニアアカウントプランナーです。\n以下の「クライアント情報」と「月次データ(JSON)」だけを根拠に、クライアントへそのまま提出できる月次レポートを日本語の Markdown で作成してください。\n\n# 構成（この順番・見出し名で出力）\n## 1. 今月のハイライト\n## 2. KPI 達成状況\n## 3. 媒体別の結果\n## 4. 見ている人の属性\n## 5. 反応が良かった投稿 TOP3 と要因\n## 6. 課題と原因の仮説\n## 7. 来月の打ち手\n## 8. 担当者からのひとこと\n\n# ルール\n- 数値は必ずデータにあるものだけを使う。\n- 前月データがある指標は必ず前月比（%）を併記する。\n- 製造業の担当者にも伝わる平易な言葉を使う。',
     keys:{ANTHROPIC_API_KEY:true,OPENAI_API_KEY:true,META_ACCESS_TOKEN:true,YOUTUBE_API_KEY:true,X_BEARER_TOKEN:false,TIKTOK_CLIENT_KEY:true,TIKTOK_CLIENT_SECRET:true,GOOGLE_OAUTH_CLIENT_ID:true,GOOGLE_OAUTH_CLIENT_SECRET:true},
@@ -87,12 +88,24 @@
     apiClientDetail: function(id, month){ var i = idx(id), pl = platforms(i);
       if(!reports[id]) reports[id] = [{ month: prevMonth(month), engine:'claude+gpt', createdAt: new Date().toISOString().slice(0,10) + 'T08:03:00', docUrl:'https://docs.google.com/', markdown: sampleReport(clients[i], prevMonth(month), pl) }];
       var posts = postsFor(i), pa = {};
-      posts.forEach(function(p, k){ if(p.platform === 'youtube'){ var a = audienceFor(i, 'youtube', 50 + k); a.viewers.age = Object.assign({}, a.viewers.age); pa['youtube|' + p.postId] = a; } });
+      posts.forEach(function(p, k){
+        if(p.platform === 'youtube'){ pa['youtube|' + p.postId] = audienceFor(i, 'youtube', 50 + k); }
+        if(p.platform === 'instagram' && k < 9){ var r = seed(i * 7 + k), nf = Math.round((35 + r() * 45) * 10) / 10;
+          pa['instagram|' + p.postId] = { month: audienceFor(i, 'youtube', 0).month, viewers: { follow: { follower: Math.round((100 - nf) * 10) / 10, non_follower: nf } } }; }
+      });
+      Object.keys(manualPA).forEach(function(key){ if(key.indexOf(id + '|') === 0) pa[key.slice(id.length + 1)] = manualPA[key]; });
       return { client: clients[i], tiktokLinked: i !== 3, googleLinked: i % 3 !== 1, postAudience: pa, monthly:{ month:month, prevMonth:prevMonth(month), summary:summary(pl), platforms:pl }, series: series(i), recentPosts: posts, reports: reports[id] }; },
     apiGenerateReport: function(id, month, engine){ var i = idx(id); var r = { month:month, engine:engine, createdAt:new Date().toISOString().slice(0,19), docUrl:'https://docs.google.com/', markdown: sampleReport(clients[i], month, platforms(i)) };
       reports[id] = [r].concat(reports[id] || []); return r; },
     apiAsk: function(id, month, q){ return '**デモ回答**（実際は Claude / ChatGPT がこの会社のデータをもとに回答します）\n\n質問：' + q + '\n\n- 反応が良い「人が映る投稿」を週 2 本に増やす\n- YouTube 長尺は 60 秒以内のショートに切り出す\n- 投稿時間は平日 12 時台に寄せる'; },
-    apiManualAudience: function(){ return 10; },
+    apiManualAudience: function(input){
+      if(input.scope && input.scope !== 'account'){
+        var v = {}; ['age','gender','follow'].forEach(function(dim){ var src = input[dim] || {}, o = {}, any = false;
+          Object.keys(src).forEach(function(k){ if(src[k] !== '' && src[k] != null){ o[k] = Number(src[k]); any = true; } }); if(any) v[dim] = o; });
+        if(!Object.keys(v).length) throw new Error('数値が 1 つも入力されていません');
+        manualPA[input.clientId + '|' + input.platform + '|' + input.scope] = { month: input.month, viewers: v };
+      }
+      return 10; },
     apiGoogleAuthUrl: function(){ throw new Error('デモ版では YouTube 詳細分析の連携は動きません（本番では Google のログイン画面が開きます）'); },
     apiCollect: function(){ return { instagram:'ok', youtube:'ok', x:'skip', tiktok:'ok' }; },
     apiCollectAll: function(){ return {}; },

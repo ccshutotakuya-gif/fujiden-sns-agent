@@ -78,6 +78,7 @@
       '## 8. 担当者からのひとこと\n現場の皆さまの協力のおかげで「人が見える発信」が定着してきました。来月はこの流れを採用につなげることに集中します。引き続きよろしくお願いいたします。\n\n> ※これはデモ用のサンプルです。実際のレポートは取得したデータと固定指示から AI が作成します。';
   }
   var reports = {};
+  var manualPA = {};
   var settings = { agencyName:'株式会社Cc', claudeModel:'claude-opus-5-5', openaiModel:'gpt-5', defaultEngine:'claude+gpt', autoMonthlyReport:true, notifyEmail:'',
     reportInstruction:'あなたは製造業クライアント専門の SNS 運用代理店のシニアアカウントプランナーです。\n以下の「クライアント情報」と「月次データ(JSON)」だけを根拠に、クライアントへそのまま提出できる月次レポートを日本語の Markdown で作成してください。\n\n# 構成（この順番・見出し名で出力）\n## 1. 今月のハイライト\n## 2. KPI 達成状況\n## 3. 媒体別の結果\n## 4. 見ている人の属性\n## 5. 反応が良かった投稿 TOP3 と要因\n## 6. 課題と原因の仮説\n## 7. 来月の打ち手\n## 8. 担当者からのひとこと\n\n# ルール\n- 数値は必ずデータにあるものだけを使う。\n- 前月データがある指標は必ず前月比（%）を併記する。\n- 製造業の担当者にも伝わる平易な言葉を使う。',
     keys:{ANTHROPIC_API_KEY:true,OPENAI_API_KEY:true,META_ACCESS_TOKEN:true,YOUTUBE_API_KEY:true,X_BEARER_TOKEN:false,TIKTOK_CLIENT_KEY:true,TIKTOK_CLIENT_SECRET:true,GOOGLE_OAUTH_CLIENT_ID:true,GOOGLE_OAUTH_CLIENT_SECRET:true},
@@ -92,12 +93,24 @@
     apiClientDetail: function(id, month){ var i = idx(id), pl = platforms(i);
       if(!reports[id]) reports[id] = [{ month: prevMonth(month), engine:'claude+gpt', createdAt: new Date().toISOString().slice(0,10) + 'T08:03:00', docUrl:'https://docs.google.com/', markdown: sampleReport(clients[i], prevMonth(month), pl) }];
       var posts = postsFor(i), pa = {};
-      posts.forEach(function(p, k){ if(p.platform === 'youtube'){ var a = audienceFor(i, 'youtube', 50 + k); a.viewers.age = Object.assign({}, a.viewers.age); pa['youtube|' + p.postId] = a; } });
+      posts.forEach(function(p, k){
+        if(p.platform === 'youtube'){ pa['youtube|' + p.postId] = audienceFor(i, 'youtube', 50 + k); }
+        if(p.platform === 'instagram' && k < 9){ var r = seed(i * 7 + k), nf = Math.round((35 + r() * 45) * 10) / 10;
+          pa['instagram|' + p.postId] = { month: audienceFor(i, 'youtube', 0).month, viewers: { follow: { follower: Math.round((100 - nf) * 10) / 10, non_follower: nf } } }; }
+      });
+      Object.keys(manualPA).forEach(function(key){ if(key.indexOf(id + '|') === 0) pa[key.slice(id.length + 1)] = manualPA[key]; });
       return { client: clients[i], tiktokLinked: i !== 3, googleLinked: i % 3 !== 1, postAudience: pa, monthly:{ month:month, prevMonth:prevMonth(month), summary:summary(pl), platforms:pl }, series: series(i), recentPosts: posts, reports: reports[id] }; },
     apiGenerateReport: function(id, month, engine){ var i = idx(id); var r = { month:month, engine:engine, createdAt:new Date().toISOString().slice(0,19), docUrl:'https://docs.google.com/', markdown: sampleReport(clients[i], month, platforms(i)) };
       reports[id] = [r].concat(reports[id] || []); return r; },
     apiAsk: function(id, month, q){ return '**デモ回答**（実際は Claude / ChatGPT がこの会社のデータをもとに回答します）\n\n質問：' + q + '\n\n- 反応が良い「人が映る投稿」を週 2 本に増やす\n- YouTube 長尺は 60 秒以内のショートに切り出す\n- 投稿時間は平日 12 時台に寄せる'; },
-    apiManualAudience: function(){ return 10; },
+    apiManualAudience: function(input){
+      if(input.scope && input.scope !== 'account'){
+        var v = {}; ['age','gender','follow'].forEach(function(dim){ var src = input[dim] || {}, o = {}, any = false;
+          Object.keys(src).forEach(function(k){ if(src[k] !== '' && src[k] != null){ o[k] = Number(src[k]); any = true; } }); if(any) v[dim] = o; });
+        if(!Object.keys(v).length) throw new Error('数値が 1 つも入力されていません');
+        manualPA[input.clientId + '|' + input.platform + '|' + input.scope] = { month: input.month, viewers: v };
+      }
+      return 10; },
     apiGoogleAuthUrl: function(){ throw new Error('デモ版では YouTube 詳細分析の連携は動きません（本番では Google のログイン画面が開きます）'); },
     apiCollect: function(){ return { instagram:'ok', youtube:'ok', x:'skip', tiktok:'ok' }; },
     apiCollectAll: function(){ return {}; },
@@ -251,6 +264,10 @@
   .tbl-wrap .posts-tbl{min-width:720px}
   .posts-tbl td.title{min-width:180px}
   .aud-inner{max-width:min(440px,calc(100vw - 72px));position:sticky;left:0}
+  .aud-inner.form{max-width:min(760px,calc(100vw - 72px))}
+  .mini-grid{display:grid;gap:6px 10px;grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
+  .mini-grid label{margin:4px 0 2px}
+  .mini-grid input{padding:5px 8px}
   .chart-box{position:relative;height:260px}
   @media (max-width:600px){ .secret{grid-template-columns:1fr} .plats{grid-template-columns:repeat(2,1fr)} .tile .v{font-size:20px} }
   .demo-banner{background:var(--accent-2);color:var(--accent);font-size:12px;padding:6px 16px;text-align:center}
@@ -446,10 +463,13 @@ function viewClient(){
         return '<tr><td class="small">' + esc(String(p.publishedAt).slice(0,10)) + '</td><td><span class="dot ' + esc(p.platform) + '"></span>' + PL_LABEL[p.platform] + '</td><td class="title">' +
           (safeUrl(p.url) ? '<a href="' + esc(safeUrl(p.url)) + '" target="_blank" rel="noopener">' + esc(p.title || '(無題)') + '</a>' : esc(p.title)) + '</td><td class="num">' + fmt(p.views) +
           '</td><td class="num">' + fmt(p.likes) + '</td><td class="num">' + fmt(p.comments) + '</td><td class="num">' + fmt(p.shares) + '</td><td class="num">' + fmt(p.saves) + '</td>' +
-          '<td>' + (pa ? '<button class="btn small" onclick="togglePostAud(' + pi + ')">見る</button>' : '<span class="small muted">—</span>') + '</td></tr>' +
-          (pa ? '<tr id="pa' + pi + '" class="aud-row hidden"><td colspan="9"><div class="aud-inner">' + audBlock(pa, p.platform) + '</div></td></tr>' : '');
+          '<td style="white-space:nowrap">' + (pa ? '<button class="btn small" onclick="togglePostAud(' + pi + ')">見る</button> ' : '') +
+            '<button class="btn small" onclick="togglePostAudForm(' + pi + ')">' + (pa ? '修正' : '入力') + '</button></td></tr>' +
+          (pa ? '<tr id="pa' + pi + '" class="aud-row hidden"><td colspan="9"><div class="aud-inner">' + audBlock(pa, p.platform) + '</div></td></tr>' : '') +
+          '<tr id="paf' + pi + '" class="aud-row hidden"><td colspan="9"><div class="aud-inner form">' + postAudForm(pi, p, pa) + '</div></td></tr>';
       }).join('') + '</table></div>' + (d.recentPosts.length ? '' : '<p class="muted">投稿データがありません</p>') +
-      '<p class="small muted" style="margin-top:8px">投稿ごとの属性は、YouTube（詳細分析を連携した場合）で取得できます。Instagram の属性はアカウント単位で「視聴者属性」タブに表示されます。</p></div>';
+      '<p class="small muted" style="margin-top:8px">投稿ごとの属性：YouTube は詳細分析の連携で自動取得、Instagram はフォロワー/フォロワー外を取得できる場合に自動取得します。' +
+      '自動で取れない分は「入力」から、Instagram アプリの投稿の「インサイトを見る」（TikTok は動画の「アナリティクス」→「視聴者」）の % を入力してください。</p></div>';
   }
 
   if(S.tab === 'audience'){
@@ -626,6 +646,29 @@ function audBlock(aud, platform){
     }
   });
   return h || '<p class="small muted">データがありません</p>';
+}
+function postAudForm(pi, p, pa){
+  var v = (pa && pa.viewers) || {};
+  function inp(id, label, cur){ return '<div><label>' + label + '</label><input type="number" step="0.1" id="' + id + '" value="' + (cur == null ? '' : esc(cur)) + '"></div>'; }
+  var hint = p.platform === 'instagram' ? 'Instagram アプリ：投稿 →「インサイトを見る」→「閲覧数」のフォロワー / フォロワー以外の %'
+    : p.platform === 'tiktok' ? 'TikTok アプリ：動画 →「アナリティクス」→「視聴者」の性別・年齢の %' : '各アプリの投稿分析の %';
+  return '<p class="small muted">' + hint + '（空欄は保存されません）</p>' +
+    '<div class="aud-sub">フォロワー / フォロワー外（閲覧の %）</div><div class="mini-grid">' +
+      FOLLOW.map(function(k){ return inp('pf' + pi + '_' + k, FOLLOW_LABEL[k], (v.follow || {})[k]); }).join('') + '</div>' +
+    '<div class="aud-sub">性別（%）</div><div class="mini-grid">' +
+      GENDER.map(function(k){ return inp('pg' + pi + '_' + k, GENDER_LABEL[k], (v.gender || {})[k]); }).join('') + '</div>' +
+    '<div class="aud-sub">年齢層（%）</div><div class="mini-grid">' +
+      AGE.map(function(k, i){ return inp('pa' + pi + '_' + i, k + ' 歳', (v.age || {})[k]); }).join('') + '</div>' +
+    '<button class="btn primary small" style="margin-top:10px" onclick="savePostAudience(' + pi + ')">この投稿の属性を保存</button>';
+}
+function togglePostAudForm(i){ var r = document.getElementById('paf' + i); if(r) r.classList.toggle('hidden'); }
+function savePostAudience(pi){
+  var p = S.detail.recentPosts[pi], age = {}, gender = {}, follow = {};
+  FOLLOW.forEach(function(k){ follow[k] = val('pf' + pi + '_' + k); });
+  GENDER.forEach(function(k){ gender[k] = val('pg' + pi + '_' + k); });
+  AGE.forEach(function(k, i){ age[k] = val('pa' + pi + '_' + i); });
+  api('apiManualAudience', { clientId:S.clientId, platform:p.platform, scope:String(p.postId), basis:'viewers', month:month(), age:age, gender:gender, follow:follow })
+    .then(function(){ toast('保存しました'); S.tab = 'posts'; openClient(S.clientId); }).catch(fail);
 }
 function togglePostAud(i){ var r = document.getElementById('pa' + i); if(r) r.classList.toggle('hidden'); }
 function saveManualAudience(){

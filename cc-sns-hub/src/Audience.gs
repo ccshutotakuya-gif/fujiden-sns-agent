@@ -117,8 +117,57 @@ function instagramAudience_(client) {
     return pr.length > 0;
   });
 
+  rows = rows.concat(instagramPostAudience_(client, token, month, fetchedAt));
+
   if (!rows.length) throw new Error('属性データを取得できませんでした（フォロワー 100 人未満、または権限 instagram_manage_insights 不足の可能性）');
   return rows;
+}
+
+/**
+ * 投稿ごとのフォロワー / フォロワー外（直近 10 投稿）。
+ * Meta が投稿単位の内訳を返すかは API バージョンによって異なるため、指定方法を順に試し、
+ * 返らなければ何もしない（その場合は画面の「投稿」タブから手入力する）。
+ */
+function instagramPostAudience_(client, token, month, fetchedAt) {
+  var recent = postsFor_(client.id).filter(function (p) { return p.platform === 'instagram'; })
+    .sort(function (a, b) { return String(b.publishedAt).localeCompare(String(a.publishedAt)); }).slice(0, 10);
+  if (!recent.length) return [];
+  var q = '&access_token=' + encodeURIComponent(token);
+  var variants = ['metric=views&metric_type=total_value&breakdown=follow_type',
+                  'metric=views&metric_type=total_value&breakdown=follower_type',
+                  'metric=reach&metric_type=total_value&breakdown=follow_type'];
+  // どの指定方法が通るかを 1 投稿目で判定し、残りはその方法だけで並列取得する
+  var probeBase = 'https://graph.facebook.com/' + META_GRAPH_VERSION + '/';
+  var working = null;
+  for (var i = 0; i < variants.length && !working; i++) {
+    try {
+      var res = httpJson_(probeBase + recent[0].postId + '/insights?' + variants[i] + q);
+      if (followCounts_(res)) working = variants[i];
+    } catch (e) { /* 非対応 */ }
+  }
+  if (!working) return [];
+  var responses = UrlFetchApp.fetchAll(recent.map(function (p) {
+    return { url: probeBase + p.postId + '/insights?' + working + q, muteHttpExceptions: true };
+  }));
+  var rows = [];
+  responses.forEach(function (r, idx) {
+    if (r.getResponseCode() >= 400) return;
+    var counts = followCounts_(JSON.parse(r.getContentText()));
+    if (!counts) return;
+    rows = rows.concat(toPercentRows_({ month: month, clientId: client.id, platform: 'instagram',
+      scope: String(recent[idx].postId), basis: 'viewers', fetchedAt: fetchedAt, source: 'api' }, 'follow', counts));
+  });
+  return rows;
+}
+
+function followCounts_(res) {
+  var counts = {};
+  breakdownResults_(res).forEach(function (r) {
+    var v = String(r.dimension_values[0]).toUpperCase();
+    if (v === 'FOLLOWER') counts.follower = Number(r.value || 0);
+    if (v === 'NON_FOLLOWER') counts.non_follower = Number(r.value || 0);
+  });
+  return Object.keys(counts).length ? counts : null;
 }
 
 function tryInsights_(base, params, timeframes, q) {

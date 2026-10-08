@@ -169,6 +169,10 @@ function apiManualAudience(token, input) {
   guard_(token);
   if (PLATFORMS.indexOf(input.platform) < 0) throw new Error('媒体が不正です');
   getClient_(input.clientId);
+  if (input.scope && input.scope !== 'account') {
+    var exists = postsFor_(input.clientId).some(function (p) { return String(p.postId) === String(input.scope); });
+    if (!exists) throw new Error('対象の投稿が見つかりません');
+  }
   return saveManualAudience_(input);
 }
 

@@ -11,20 +11,20 @@
   :root{
     --bg:#F5F6F8;--panel:#FFFFFF;--panel-2:#F0F2F5;--line:#E2E5EA;--ink:#1C2430;--ink-2:#5B6574;--ink-3:#8A93A0;
     --accent:#2754C5;--accent-2:#E8EEFB;--good:#1E8E5A;--bad:#C2410C;--warn:#B7791F;
-    --ig:#C13584;--yt:#E02424;--x:#111827;--tt:#00A3B4;
+    --ig:#C13584;--s1:#2754C5;--s2:#C27A1E;--s3:#A0A8B4;--yt:#E02424;--x:#111827;--tt:#00A3B4;
     --radius:10px;--shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.08);
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
       --bg:#0F141B;--panel:#161D26;--panel-2:#1C2531;--line:#2A3442;--ink:#E7ECF2;--ink-2:#A7B1BE;--ink-3:#7A8594;
       --accent:#6E95F5;--accent-2:#1D2A44;--good:#3DBE82;--bad:#F07B4A;--warn:#E3B04B;--x:#E7ECF2;
-      --shadow:none;color-scheme:dark;
+      --s1:#5B83E8;--s2:#C27F2C;--s3:#4A5563;--shadow:none;color-scheme:dark;
     }
   }
   :root[data-theme="dark"]{
     --bg:#0F141B;--panel:#161D26;--panel-2:#1C2531;--line:#2A3442;--ink:#E7ECF2;--ink-2:#A7B1BE;--ink-3:#7A8594;
     --accent:#6E95F5;--accent-2:#1D2A44;--good:#3DBE82;--bad:#F07B4A;--warn:#E3B04B;--x:#E7ECF2;
-    --shadow:none;color-scheme:dark;
+    --s1:#5B83E8;--s2:#C27F2C;--s3:#4A5563;--shadow:none;color-scheme:dark;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--bg);color:var(--ink);font-family:'Noto Sans JP',system-ui,sans-serif;font-size:14px;line-height:1.6}
@@ -111,6 +111,23 @@
   .secret{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:8px 14px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
   .secret-in{display:flex;gap:8px}
   .secret-name .badge{margin-left:4px}
+  .aud-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+  .aud-card{min-width:0}
+  .aud-card h3{font-size:13px;margin-bottom:8px}
+  .hbar{display:grid;grid-template-columns:52px minmax(0,1fr) 44px;gap:8px;align-items:center;font-size:12px;margin:3px 0}
+  .hbar .track{height:12px;border-radius:0 4px 4px 0;background:var(--panel-2)}
+  .hbar .fill{height:100%;background:var(--s1);border-radius:0 4px 4px 0;min-width:2px}
+  .hbar .pct{text-align:right;font-variant-numeric:tabular-nums}
+  .stack{display:flex;gap:2px;height:16px;margin:4px 0 6px}
+  .stack span{display:block;height:100%;min-width:2px}
+  .stack span:first-child{border-radius:4px 0 0 4px}.stack span:last-child{border-radius:0 4px 4px 0}
+  .legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--ink-2)}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+  .aud-sub{font-size:12px;color:var(--ink-2);margin:12px 0 2px}
+  tr.aud-row td{background:var(--panel-2)}
+  .tbl-wrap .posts-tbl{min-width:720px}
+  .posts-tbl td.title{min-width:180px}
+  .aud-inner{max-width:min(440px,calc(100vw - 72px));position:sticky;left:0}
   .chart-box{position:relative;height:260px}
   @media (max-width:600px){ .secret{grid-template-columns:1fr} .plats{grid-template-columns:repeat(2,1fr)} .tile .v{font-size:20px} }
 </style>
@@ -276,7 +293,7 @@ function openClient(id){
 
 function viewClient(){
   var d = S.detail, c = d.client, mo = d.monthly;
-  var tabs = [['overview','概要'],['posts','投稿'],['report','月次レポート'],['ask','AI に質問'],['manual','手入力'],['info','基本情報・連携']];
+  var tabs = [['overview','概要'],['posts','投稿'],['audience','視聴者属性'],['report','月次レポート'],['ask','AI に質問'],['manual','手入力'],['info','基本情報・連携']];
   var h = '<div class="bar" style="padding:0 0 8px"><button class="btn small" onclick="go(\'dashboard\')">← 一覧</button>' +
     '<h2 style="font-size:18px">' + esc(c.name) + '</h2><span class="muted small">' + esc(c.industry || '') + '</span><div class="spacer"></div>' +
     '<button class="btn" onclick="collectOne()">この会社のデータ取得</button></div>';
@@ -298,12 +315,25 @@ function viewClient(){
   }
 
   if(S.tab === 'posts'){
-    h += '<div class="panel"><h2>直近の投稿</h2><div class="tbl-wrap"><table><tr><th>日付</th><th>媒体</th><th>内容</th><th class="num">再生</th><th class="num">いいね</th><th class="num">コメント</th><th class="num">シェア</th><th class="num">保存</th></tr>' +
-      d.recentPosts.map(function(p){
-        return '<tr><td class="small">' + esc(String(p.publishedAt).slice(0,10)) + '</td><td><span class="dot ' + esc(p.platform) + '"></span>' + PL_LABEL[p.platform] + '</td><td>' +
+    h += '<div class="panel"><h2>直近の投稿</h2><div class="tbl-wrap"><table class="posts-tbl"><tr><th>日付</th><th>媒体</th><th>内容</th><th class="num">再生</th><th class="num">いいね</th><th class="num">コメント</th><th class="num">シェア</th><th class="num">保存</th><th>属性</th></tr>' +
+      d.recentPosts.map(function(p, pi){
+        var pa = (d.postAudience || {})[p.platform + '|' + p.postId];
+        return '<tr><td class="small">' + esc(String(p.publishedAt).slice(0,10)) + '</td><td><span class="dot ' + esc(p.platform) + '"></span>' + PL_LABEL[p.platform] + '</td><td class="title">' +
           (safeUrl(p.url) ? '<a href="' + esc(safeUrl(p.url)) + '" target="_blank" rel="noopener">' + esc(p.title || '(無題)') + '</a>' : esc(p.title)) + '</td><td class="num">' + fmt(p.views) +
-          '</td><td class="num">' + fmt(p.likes) + '</td><td class="num">' + fmt(p.comments) + '</td><td class="num">' + fmt(p.shares) + '</td><td class="num">' + fmt(p.saves) + '</td></tr>';
-      }).join('') + '</table></div>' + (d.recentPosts.length ? '' : '<p class="muted">投稿データがありません</p>') + '</div>';
+          '</td><td class="num">' + fmt(p.likes) + '</td><td class="num">' + fmt(p.comments) + '</td><td class="num">' + fmt(p.shares) + '</td><td class="num">' + fmt(p.saves) + '</td>' +
+          '<td>' + (pa ? '<button class="btn small" onclick="togglePostAud(' + pi + ')">見る</button>' : '<span class="small muted">—</span>') + '</td></tr>' +
+          (pa ? '<tr id="pa' + pi + '" class="aud-row hidden"><td colspan="9"><div class="aud-inner">' + audBlock(pa, p.platform) + '</div></td></tr>' : '');
+      }).join('') + '</table></div>' + (d.recentPosts.length ? '' : '<p class="muted">投稿データがありません</p>') +
+      '<p class="small muted" style="margin-top:8px">投稿ごとの属性は、YouTube（詳細分析を連携した場合）で取得できます。Instagram の属性はアカウント単位で「視聴者属性」タブに表示されます。</p></div>';
+  }
+
+  if(S.tab === 'audience'){
+    h += '<p class="small muted" style="margin-bottom:12px">年齢層・性別・フォロワー/フォロワー外の割合（%）です。対象月までの最新データを表示しています。</p><div class="aud-grid">' +
+      PL.map(function(p){
+        var x = mo.platforms[p], aud = x && x.audience;
+        return '<div class="panel aud-card"><h2><span class="dot ' + p + '"></span>' + PL_LABEL[p] + (aud ? ' <span class="small muted">（' + monthJa(aud.month) + ' 時点）</span>' : '') + '</h2>' +
+          (aud ? audBlock(aud, p) : '<p class="small muted">' + AUD_HOWTO[p] + '</p>') + '</div>';
+      }).join('') + '</div>';
   }
 
   if(S.tab === 'report'){
@@ -342,13 +372,22 @@ function viewClient(){
       '<div><label>再生/表示</label><input type="number" id="pViews"></div><div><label>いいね</label><input type="number" id="pLikes"></div>' +
       '<div><label>コメント</label><input type="number" id="pComments"></div><div><label>シェア/リポスト</label><input type="number" id="pShares"></div><div><label>保存</label><input type="number" id="pSaves"></div></div>' +
       '<button class="btn primary" style="margin-top:12px" onclick="saveManualPost()">保存</button></div>';
+    h += '<div class="panel"><h2>視聴者属性の手入力</h2><p class="small muted">TikTok・X など API で属性が取れない媒体は、各アプリの分析画面の % をそのまま入力してください。空欄は保存されません。</p><div class="row">' +
+      '<div><label>媒体</label><select id="aPlat">' + PL.map(function(p){ return '<option value="' + p + '"' + (p === 'tiktok' ? ' selected' : '') + '>' + PL_LABEL[p] + '</option>'; }).join('') + '</select></div>' +
+      '<div><label>対象</label><select id="aBasis"><option value="viewers">視聴者</option><option value="followers">フォロワー</option></select></div>' +
+      '<div><label>対象月</label><input type="month" id="aMonth" value="' + esc(mo.month) + '"></div></div>' +
+      '<div class="aud-sub">年齢層（%）</div><div class="row">' + AGE.map(function(k, i){ return '<div><label>' + k + ' 歳</label><input type="number" step="0.1" id="aAge' + i + '"></div>'; }).join('') + '</div>' +
+      '<div class="aud-sub">性別（%）</div><div class="row">' + GENDER.map(function(k){ return '<div><label>' + GENDER_LABEL[k] + '</label><input type="number" step="0.1" id="aG_' + k + '"></div>'; }).join('') + '</div>' +
+      '<div class="aud-sub">フォロワー / フォロワー外（閲覧の %）</div><div class="row">' + FOLLOW.map(function(k){ return '<div><label>' + FOLLOW_LABEL[k] + '</label><input type="number" step="0.1" id="aF_' + k + '"></div>'; }).join('') + '</div>' +
+      '<button class="btn primary" style="margin-top:12px" onclick="saveManualAudience()">保存</button></div>';
   }
 
   if(S.tab === 'info'){
     h += '<div class="panel"><h2>基本情報</h2><table>' +
-      [['目的', c.goal],['KPI', c.kpi],['レポートのトーン', c.tone],['補足', c.notes],['Instagram ID', c.ig_user_id],['YouTube', c.yt_channel_id],['X', c.x_username ? '@' + c.x_username : ''],['TikTok', d.tiktokLinked ? '連携済み' : '未連携']]
+      [['目的', c.goal],['KPI', c.kpi],['レポートのトーン', c.tone],['補足', c.notes],['Instagram ID', c.ig_user_id],['YouTube', c.yt_channel_id],['YouTube 詳細分析', d.googleLinked ? '連携済み（視聴者属性を取得）' : '未連携'],['X', c.x_username ? '@' + c.x_username : ''],['TikTok', d.tiktokLinked ? '連携済み' : '未連携']]
       .map(function(r){ return '<tr><th style="width:160px">' + r[0] + '</th><td>' + esc(r[1] || '—') + '</td></tr>'; }).join('') + '</table>' +
       '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><button class="btn" onclick="editClient(S.detail.client)">編集</button>' +
+      '<button class="btn" onclick="linkGoogle()">' + (d.googleLinked ? 'YouTube 詳細分析を再連携' : 'YouTube 詳細分析を連携') + '</button>' +
       '<button class="btn" onclick="linkTikTok()">' + (d.tiktokLinked ? 'TikTok を再連携' : 'TikTok を連携') + '</button>' +
       '<button class="btn danger" onclick="delClient()">削除</button></div></div>';
   }
@@ -420,6 +459,64 @@ function linkTikTok(){
     toast('別タブで TikTok にログインし、許可してください（クライアント本人のアカウントで）');
   }).catch(fail);
 }
+/* ---------- 視聴者属性 ---------- */
+var AGE = ['13-17','18-24','25-34','35-44','45-54','55-64','65+'];
+var GENDER = ['female','male','unknown'];
+var GENDER_LABEL = { female:'女性', male:'男性', unknown:'その他・不明' };
+var GENDER_COLOR = { female:'var(--s2)', male:'var(--s1)', unknown:'var(--s3)' };
+var FOLLOW = ['follower','non_follower'];
+var FOLLOW_LABEL = { follower:'フォロワー', non_follower:'フォロワー外' };
+var FOLLOW_COLOR = { follower:'var(--s1)', non_follower:'var(--s2)' };
+var BASIS_LABEL = { followers:'フォロワーの属性', viewers:'視聴者の属性', engaged:'反応した人の属性' };
+var AUD_HOWTO = {
+  instagram:'毎朝のデータ取得で自動取得されます（フォロワー 100 人以上が条件）。まだ取得されていません。',
+  youtube:'「基本情報・連携」タブで「YouTube 詳細分析を連携」すると自動取得されます。',
+  x:'X の API では属性が取得できません。「手入力」タブから入力してください。',
+  tiktok:'TikTok の API では属性が取得できません。TikTok アプリの分析画面の % を「手入力」タブから入力してください。'
+};
+function pctTxt(v){ return v == null ? '—' : (Math.round(v * 10) / 10) + '%'; }
+function stackBar(map, keys, labels, colors){
+  var segs = keys.filter(function(k){ return map[k] > 0; });
+  return '<div class="stack">' + segs.map(function(k){
+    return '<span style="flex:' + map[k] + ';background:' + colors[k] + '" title="' + labels[k] + ' ' + pctTxt(map[k]) + '"></span>'; }).join('') + '</div>' +
+    '<div class="legend">' + keys.filter(function(k){ return map[k] != null; }).map(function(k){
+      return '<span><i style="background:' + colors[k] + '"></i>' + labels[k] + ' <b>' + pctTxt(map[k]) + '</b></span>'; }).join('') + '</div>';
+}
+function audBlock(aud, platform){
+  var h = '';
+  ['viewers','followers','engaged'].forEach(function(basis){
+    var b = aud[basis]; if(!b) return;
+    var label = platform === 'youtube' && basis === 'viewers' ? '視聴者の属性' : BASIS_LABEL[basis];
+    h += '<div class="aud-sub"><b>' + label + '</b></div>';
+    if(b.follow){
+      h += '<div class="aud-sub">' + (platform === 'youtube' ? 'チャンネル登録者 / 未登録（視聴回数の割合）' : 'フォロワー / フォロワー外（閲覧の割合）') + '</div>' +
+        stackBar(b.follow, FOLLOW, platform === 'youtube' ? { follower:'登録者', non_follower:'未登録' } : FOLLOW_LABEL, FOLLOW_COLOR);
+    }
+    if(b.gender){ h += '<div class="aud-sub">性別</div>' + stackBar(b.gender, GENDER, GENDER_LABEL, GENDER_COLOR); }
+    if(b.age){
+      var max = Math.max.apply(null, AGE.map(function(k){ return b.age[k] || 0; })) || 1;
+      h += '<div class="aud-sub">年齢層</div>' + AGE.filter(function(k){ return b.age[k] != null; }).map(function(k){
+        return '<div class="hbar" title="' + k + ' 歳 ' + pctTxt(b.age[k]) + '"><span>' + k + '</span><div class="track"><div class="fill" style="width:' + (b.age[k] / max * 100) + '%"></div></div><span class="pct">' + pctTxt(b.age[k]) + '</span></div>';
+      }).join('');
+    }
+  });
+  return h || '<p class="small muted">データがありません</p>';
+}
+function togglePostAud(i){ var r = document.getElementById('pa' + i); if(r) r.classList.toggle('hidden'); }
+function saveManualAudience(){
+  var age = {}, gender = {}, follow = {};
+  AGE.forEach(function(k, i){ age[k] = val('aAge' + i); });
+  GENDER.forEach(function(k){ gender[k] = val('aG_' + k); });
+  FOLLOW.forEach(function(k){ follow[k] = val('aF_' + k); });
+  api('apiManualAudience', { clientId:S.clientId, platform:val('aPlat'), basis:val('aBasis'), month:val('aMonth'), age:age, gender:gender, follow:follow })
+    .then(function(){ toast('保存しました'); S.tab = 'audience'; openClient(S.clientId); }).catch(fail);
+}
+function linkGoogle(){
+  api('apiGoogleAuthUrl', S.clientId).then(function(url){
+    window.open(url, '_blank', 'noopener');
+    toast('別タブで、そのクライアントの YouTube チャンネルの Google アカウントでログインし、許可してください');
+  }).catch(fail);
+}
 function delClient(){
   if(!confirm(S.detail.client.name + ' を削除しますか？（取得済みデータはスプレッドシートに残ります）')) return;
   api('apiDeleteClient', S.clientId).then(function(){ toast('削除しました'); go('dashboard'); }).catch(fail);
@@ -459,7 +556,8 @@ function saveClient(){
 var SECRET_LABELS = {
   ANTHROPIC_API_KEY:'Claude（Anthropic）API キー', OPENAI_API_KEY:'ChatGPT（OpenAI）API キー',
   META_ACCESS_TOKEN:'Meta（Instagram）アクセストークン', YOUTUBE_API_KEY:'YouTube Data API キー',
-  X_BEARER_TOKEN:'X API Bearer Token（任意・従量課金）', TIKTOK_CLIENT_KEY:'TikTok Client Key', TIKTOK_CLIENT_SECRET:'TikTok Client Secret'
+  X_BEARER_TOKEN:'X API Bearer Token（任意・従量課金）', TIKTOK_CLIENT_KEY:'TikTok Client Key', TIKTOK_CLIENT_SECRET:'TikTok Client Secret',
+  GOOGLE_OAUTH_CLIENT_ID:'Google OAuth クライアント ID（YouTube 詳細分析）', GOOGLE_OAUTH_CLIENT_SECRET:'Google OAuth クライアント シークレット'
 };
 function viewSettings(){
   var s = S.boot.settings;
@@ -478,7 +576,7 @@ function viewSettings(){
       return '<div class="secret"><div class="secret-name">' + SECRET_LABELS[k] + ' ' + (s.keys[k] ? '<span class="badge ok">登録済み</span>' : '<span class="badge ng">未登録</span>') +
         '</div><div class="secret-in"><input type="password" id="k_' + k + '" placeholder="新しい値を入力" autocomplete="off"><button class="btn small" onclick="saveSecret(\'' + k + '\')">保存</button></div></div>';
     }).join('') +
-    '<p class="small muted" style="margin-top:10px">TikTok アプリのリダイレクト URI に登録する URL：<br><code style="word-break:break-all">' + esc(s.redirectUri) + '</code></p>' +
+    '<p class="small muted" style="margin-top:10px">TikTok アプリ・Google OAuth クライアントのリダイレクト URI に登録する URL：<br><code style="word-break:break-all">' + esc(s.redirectUri) + '</code></p>' +
     '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button class="btn" onclick="testAi(\'claude\')">Claude 接続テスト</button><button class="btn" onclick="testAi(\'gpt\')">ChatGPT 接続テスト</button><button class="btn" onclick="showLogs()">エラーログ</button></div><div id="logs"></div></div>';
   h += '<div class="panel"><h2>共通パスワードの変更</h2><p class="small muted">変更すると全員がログアウトされます。新しいパスワードを社内に共有してください。</p><div class="row">' +
     '<div><label>現在のパスワード</label><input type="password" id="pw0"></div><div><label>新しいパスワード（8 文字以上）</label><input type="password" id="pw1"></div><div><label>新しいパスワード（確認）</label><input type="password" id="pw2"></div></div>' +

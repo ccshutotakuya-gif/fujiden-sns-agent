@@ -62,6 +62,7 @@ function collectClient_(client) {
       log_('error', 'collect:' + p, client.name + ' — ' + e.message);
     }
   });
+  result.audience = collectAudience_(client);
   return result;
 }
 
@@ -218,8 +219,7 @@ function tiktokTokenRequest_(payload) {
 function tiktokAuthUrl_(clientId) {
   var key = props_().getProperty(PROP.TIKTOK_CLIENT_KEY);
   if (!key) throw new Error('TIKTOK_CLIENT_KEY 未設定');
-  var state = Utilities.getUuid();
-  CacheService.getScriptCache().put('tt_state:' + state, clientId, 1800);
+  var state = newOAuthState_('tiktok', clientId);
   return 'https://www.tiktok.com/v2/auth/authorize/?client_key=' + encodeURIComponent(key) +
     '&scope=' + encodeURIComponent(TIKTOK_SCOPES) + '&response_type=code' +
     '&redirect_uri=' + encodeURIComponent(ScriptApp.getService().getUrl()) +
@@ -227,11 +227,7 @@ function tiktokAuthUrl_(clientId) {
 }
 
 /** doGet から呼ばれる OAuth コールバック */
-function tiktokHandleCallback_(code, state) {
-  var cache = CacheService.getScriptCache();
-  var clientId = cache.get('tt_state:' + state);
-  if (!clientId) throw new Error('連携リンクの有効期限が切れています。もう一度やり直してください。');
-  cache.remove('tt_state:' + state);
+function tiktokHandleCallback_(clientId, code) {
   var t = tiktokTokenRequest_({
     client_key: props_().getProperty(PROP.TIKTOK_CLIENT_KEY),
     client_secret: props_().getProperty(PROP.TIKTOK_CLIENT_SECRET),

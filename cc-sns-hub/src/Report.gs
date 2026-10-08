@@ -4,7 +4,7 @@
 
 function monthlyDataFor_(clientId, month) {
   var client = getClient_(clientId);
-  return buildMonthlyData_(client, snapshotsFor_(clientId), postsFor_(clientId), month);
+  return buildMonthlyData_(client, snapshotsFor_(clientId), postsFor_(clientId), month, null, audienceFor_(clientId));
 }
 
 function generateReport_(clientId, month, engine) {

@@ -81,3 +81,26 @@ test('初月（前月データなし）は月初スナップショットを起�
   assert.strictEqual(d.platforms.instagram.followersStart, 1150);
   assert.strictEqual(d.platforms.instagram.change, undefined);
 });
+
+test('属性データ: 対象月以前で最新の月を使い、アカウントと投稿を分けて付与する', () => {
+  const aud = [
+    { month: '2026-09', platform: 'instagram', scope: 'account', basis: 'followers', dimension: 'age', key: '25-34', value: '40' },
+    { month: '2026-10', platform: 'instagram', scope: 'account', basis: 'followers', dimension: 'age', key: '25-34', value: '45' },
+    { month: '2026-10', platform: 'instagram', scope: 'account', basis: 'followers', dimension: 'age', key: '18-24', value: '30' },
+    { month: '2026-10', platform: 'instagram', scope: 'account', basis: 'viewers', dimension: 'follow', key: 'non_follower', value: '62.5' },
+    { month: '2026-11', platform: 'instagram', scope: 'account', basis: 'followers', dimension: 'age', key: '25-34', value: '99' },
+    { month: '2026-10', platform: 'youtube', scope: 'v1', basis: 'viewers', dimension: 'gender', key: 'male', value: '70' }
+  ];
+  const posts2 = posts.concat([{ platform: 'youtube', postId: 'v1', publishedAt: '2026-10-06T00:00:00Z', title: 'V1', views: 9000 }]);
+  const d = M.buildMonthlyData_(client, snaps, posts2, '2026-10', null, aud);
+  const ig = d.platforms.instagram.audience;
+  assert.strictEqual(ig.month, '2026-10');
+  assert.deepStrictEqual(ig.followers.age, { '25-34': 45, '18-24': 30 });
+  assert.strictEqual(ig.viewers.follow.non_follower, 62.5);
+  const top = d.platforms.youtube.topPosts.find(p => p.postId === 'v1');
+  assert.strictEqual(top.audience.viewers.gender.male, 70);
+  assert.strictEqual(d.platforms.youtube.audience, undefined);
+  // 9 月を指定すると 9 月のデータ
+  assert.strictEqual(M.audienceSummary_(aud, 'instagram', 'account', '2026-09').followers.age['25-34'], 40);
+  assert.ok(M.postAudienceMap_(aud, '2026-10')['youtube|v1']);
+});

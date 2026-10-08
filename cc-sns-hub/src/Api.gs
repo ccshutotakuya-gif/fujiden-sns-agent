@@ -5,13 +5,17 @@
 
 function doGet(e) {
   var p = (e && e.parameter) || {};
-  if (p.code && p.state) {
-    // TikTok OAuth コールバック
+  if (p.state && (p.code || p.error)) {
+    // OAuth コールバック（TikTok / YouTube 詳細分析）
+    var label = '連携';
     try {
-      var c = tiktokHandleCallback_(p.code, p.state);
-      return simplePage_('TikTok 連携が完了しました', c.name + ' の TikTok を連携しました。このタブを閉じて Hub に戻ってください。');
+      if (p.error) throw new Error('許可されませんでした（' + p.error + '）');
+      var st = takeOAuthState_(p.state);
+      label = st.provider === 'google' ? 'YouTube 詳細分析の連携' : 'TikTok 連携';
+      var c = st.provider === 'google' ? googleHandleCallback_(st.clientId, p.code) : tiktokHandleCallback_(st.clientId, p.code);
+      return simplePage_(label + 'が完了しました', c.name + ' の' + label + 'が完了しました。このタブを閉じて Hub に戻ってください。');
     } catch (err) {
-      return simplePage_('TikTok 連携に失敗しました', err.message);
+      return simplePage_(label + 'に失敗しました', err.message);
     }
   }
   return HtmlService.createTemplateFromFile('index').evaluate()
@@ -87,10 +91,13 @@ function apiClientDetail(token, clientId, month) {
   var c = getClient_(clientId);
   var snaps = snapshotsFor_(clientId);
   var posts = postsFor_(clientId);
+  var audience = audienceFor_(clientId);
   return {
     client: stripRow_(c),
     tiktokLinked: !!getTikTokTokens_(clientId),
-    monthly: buildMonthlyData_(c, snaps, posts, month),
+    googleLinked: !!getGoogleTokens_(clientId),
+    monthly: buildMonthlyData_(c, snaps, posts, month, null, audience),
+    postAudience: postAudienceMap_(audience, month),
     series: followerSeries_(snaps, 120),
     recentPosts: posts.sort(function (a, b) { return String(b.publishedAt).localeCompare(String(a.publishedAt)); })
       .slice(0, 30).map(stripRow_),
@@ -155,6 +162,20 @@ function apiManualPost(token, input) {
   });
   savePosts_([post]);
   return true;
+}
+
+/** 年齢層・性別・フォロワー/フォロワー外の手入力（TikTok / X など） */
+function apiManualAudience(token, input) {
+  guard_(token);
+  if (PLATFORMS.indexOf(input.platform) < 0) throw new Error('媒体が不正です');
+  getClient_(input.clientId);
+  return saveManualAudience_(input);
+}
+
+function apiGoogleAuthUrl(token, clientId) {
+  guard_(token);
+  getClient_(clientId);
+  return googleAuthUrl_(clientId);
 }
 
 function apiTikTokAuthUrl(token, clientId) {

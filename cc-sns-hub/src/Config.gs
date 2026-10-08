@@ -32,6 +32,8 @@ var SHEETS = {
   Posts: ['clientId', 'platform', 'postId', 'publishedAt', 'title', 'url', 'type',
           'views', 'reach', 'likes', 'comments', 'shares', 'saves', 'fetchedAt'],
   Reports: ['id', 'clientId', 'month', 'engine', 'createdAt', 'docUrl', 'markdown'],
+  // 年齢層・性別・フォロワー/フォロワー外の割合（%）。scope は account または投稿 ID
+  Audience: ['month', 'clientId', 'platform', 'scope', 'basis', 'dimension', 'key', 'value', 'fetchedAt', 'source'],
   Logs: ['at', 'level', 'scope', 'message']
 };
 
@@ -48,12 +50,15 @@ var PROP = {
   X_BEARER_TOKEN: 'X_BEARER_TOKEN',
   TIKTOK_CLIENT_KEY: 'TIKTOK_CLIENT_KEY',
   TIKTOK_CLIENT_SECRET: 'TIKTOK_CLIENT_SECRET',
+  GOOGLE_OAUTH_CLIENT_ID: 'GOOGLE_OAUTH_CLIENT_ID',
+  GOOGLE_OAUTH_CLIENT_SECRET: 'GOOGLE_OAUTH_CLIENT_SECRET',
   SETTINGS_JSON: 'SETTINGS_JSON'
 };
 
 /** 画面で扱う秘密情報キー（値そのものは画面に返さない） */
 var SECRET_KEYS = ['ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'META_ACCESS_TOKEN',
-                   'YOUTUBE_API_KEY', 'X_BEARER_TOKEN', 'TIKTOK_CLIENT_KEY', 'TIKTOK_CLIENT_SECRET'];
+                   'YOUTUBE_API_KEY', 'X_BEARER_TOKEN', 'TIKTOK_CLIENT_KEY', 'TIKTOK_CLIENT_SECRET',
+                   'GOOGLE_OAUTH_CLIENT_ID', 'GOOGLE_OAUTH_CLIENT_SECRET'];
 
 function props_() {
   return PropertiesService.getScriptProperties();

@@ -56,7 +56,7 @@ function platformMonth_(snaps, posts, month) {
   var top = monthPosts.slice().sort(function (a, b) {
     return (n_(b.views) || 0) - (n_(a.views) || 0) || (n_(b.likes) || 0) - (n_(a.likes) || 0);
   }).slice(0, 3).map(function (p) {
-    return { title: p.title, url: p.url, type: p.type, publishedAt: p.publishedAt,
+    return { postId: p.postId, title: p.title, url: p.url, type: p.type, publishedAt: p.publishedAt,
              views: n_(p.views), likes: n_(p.likes), comments: n_(p.comments), shares: n_(p.shares), saves: n_(p.saves) };
   });
 
@@ -92,7 +92,7 @@ function toJstMonth_(iso) {
  * レポート用の月次データ一式
  * @return {{month, prevMonth, client, platforms: Object, summary: Object}}
  */
-function buildMonthlyData_(client, snapshots, posts, month, platforms) {
+function buildMonthlyData_(client, snapshots, posts, month, platforms, audienceRows) {
   var prev = prevMonth_(month);
   var out = {
     month: month,
@@ -118,6 +118,14 @@ function buildMonthlyData_(client, snapshots, posts, month, platforms) {
           ? Math.round((cur.engagementRate - before.engagementRate) * 100) / 100 : null
       };
     }
+    if (audienceRows) {
+      var aud = audienceSummary_(audienceRows, p, 'account', month);
+      if (aud) cur.audience = aud;
+      cur.topPosts.forEach(function (tp) {
+        var pa = audienceSummary_(audienceRows, p, String(tp.postId), month);
+        if (pa) tp.audience = pa;
+      });
+    }
     out.platforms[p] = cur;
     out.summary.followersEnd += cur.followersEnd || 0;
     out.summary.followerGrowth += cur.followerGrowth || 0;
@@ -125,6 +133,35 @@ function buildMonthlyData_(client, snapshots, posts, month, platforms) {
     out.summary.postsPublished += cur.postsPublished || 0;
   });
   return out;
+}
+
+/**
+ * 属性データの要約。対象月以前で最も新しい月のデータを使う。
+ * @return {{month, followers?: {age, gender}, viewers?: {age, gender, follow}, engaged?: {...}}|null}
+ */
+function audienceSummary_(rows, platform, scope, month) {
+  var mine = rows.filter(function (r) {
+    return r.platform === platform && String(r.scope) === scope && String(r.month) <= month;
+  });
+  if (!mine.length) return null;
+  var latest = mine.map(function (r) { return String(r.month); }).sort().pop();
+  var out = { month: latest };
+  mine.filter(function (r) { return String(r.month) === latest; }).forEach(function (r) {
+    var b = out[r.basis] = out[r.basis] || {};
+    var d = b[r.dimension] = b[r.dimension] || {};
+    d[r.key] = n_(r.value);
+  });
+  return out;
+}
+
+/** 投稿 ID → 属性要約（投稿一覧の表示用） */
+function postAudienceMap_(rows, month) {
+  var map = {};
+  rows.filter(function (r) { return r.scope !== 'account'; }).forEach(function (r) {
+    var k = r.platform + '|' + r.scope;
+    if (!map[k]) map[k] = audienceSummary_(rows, r.platform, String(r.scope), month);
+  });
+  return map;
 }
 
 /** 直近 N 日のフォロワー推移（ダッシュボードのグラフ用） */
@@ -141,5 +178,6 @@ function followerSeries_(snapshots, days) {
 
 if (typeof module !== 'undefined') {
   module.exports = { buildMonthlyData_: buildMonthlyData_, platformMonth_: platformMonth_, prevMonth_: prevMonth_,
-                     toJstMonth_: toJstMonth_, followerSeries_: followerSeries_ };
+                     toJstMonth_: toJstMonth_, followerSeries_: followerSeries_,
+                     audienceSummary_: audienceSummary_, postAudienceMap_: postAudienceMap_ };
 }
